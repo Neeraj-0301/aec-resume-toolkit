@@ -1,0 +1,2566 @@
+<!DOCTYPE html>
+<!-- Resume Builder & Scorer -->
+<html lang="en" data-theme="light"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEC Resume Building &amp; Scoring Toolkit — by Ar. Neeraj</title>
+<meta name="description" content="A free, browser-based toolkit that builds ATS-safe resumes for architects and civil/MEP engineers, scores them against your discipline, and matches them to a job description. Nothing you type ever leaves your browser.">
+<meta name="author" content="Ar. Neeraj">
+<meta property="og:title" content="AEC Resume Building & Scoring Toolkit">
+<meta property="og:description" content="Free resume builder and scorer built specifically for architecture, civil/structural and MEP job-seekers. Runs entirely in your browser — nothing is uploaded.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0f6a6e">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><rect width=%2224%22 height=%2224%22 rx=%225%22 fill=%22%230f6a6e%22/><path d=%22M6 17V7l6 9 6-9v10%22 stroke=%22white%22 stroke-width=%222%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
+<link rel="preconnect" href="https://api.fontshare.com/">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<style>
+:root,[data-theme="light"]{
+  --text-xs:clamp(.75rem,.7rem + .2vw,.82rem);
+  --text-sm:clamp(.85rem,.8rem + .25vw,.95rem);
+  --text-base:clamp(.95rem,.9rem + .25vw,1.05rem);
+  --text-lg:clamp(1.1rem,1rem + .6vw,1.3rem);
+  --text-xl:clamp(1.4rem,1.1rem + 1vw,1.8rem);
+  --sp1:.25rem;--sp2:.5rem;--sp3:.75rem;--sp4:1rem;--sp5:1.25rem;--sp6:1.5rem;--sp8:2rem;
+
+  /* Neubrutalism palette */
+  --bg:#f6f1e6;--surface:#ffffff;--surface2:#f2f2f2;--offset:#e8e8e8;
+  --border:#000000;--divider:#000000;--text:#111111;--muted:#4a4a4a;--faint:#767676;--inverse:#ffffff;
+  --primary:#ff5505;--primary-h:#e04c04;--primary-hi:#ffe0cc;
+  --blue:#0087c9;--blue-hi:#cdeaf9;--amber:#ff8d29;--amber-hi:#ffe6cc;
+  --success:#1a8c3f;--warn:#ff8d29;--error:#ff5505;
+  --shadow-c:#000000;
+  --bw:3px; /* border weight */
+  --sh-sm:3px 3px 0 var(--shadow-c);--sh-md:5px 5px 0 var(--shadow-c);--sh-lg:8px 8px 0 var(--shadow-c);
+  --r-sm:4px;--r-md:6px;--r-lg:8px;--r-xl:10px;--r-full:999px;
+  --font:'Satoshi',system-ui,sans-serif;--disp:'Clash Display','Satoshi',sans-serif;--ease:120ms ease;
+  --resume-accent:#0f6a6e;
+}
+[data-theme="dark"]{
+  --bg:#000000;--surface:#161616;--surface2:#1f1f1f;--offset:#2a2a2a;
+  --border:#ffffff;--divider:#ffffff;--text:#f4f4f4;--muted:#b8b8b8;--faint:#8a8a8a;--inverse:#000000;
+  --primary:#ff6a2b;--primary-h:#ff8248;--primary-hi:#3a1f10;
+  --blue:#2ba9e6;--blue-hi:#0c2a36;--amber:#ffa14f;--amber-hi:#3a2712;
+  --success:#3fbf6a;--warn:#ffa14f;--error:#ff6a2b;
+  --shadow-c:#ffffff;
+}
+/* Digital brutalism: raw structure over decoration. Flat colour, hard 1px
+   rules, zero radius, system/mono type. Deliberately NOT --resume-accent —
+   the exported resume stays whatever colour the person chose in Design,
+   independent of which app chrome theme they're browsing in. */
+[data-theme="brutal"]{
+  --bg:#ffffff;--surface:#ffffff;--surface2:#eeeeee;--offset:#e2e2e2;
+  --border:#000000;--divider:#000000;--text:#000000;--muted:#3a3a3a;--faint:#6b6b6b;--inverse:#ffffff;
+  --primary:#ff0000;--primary-h:#c00;--primary-hi:#ffd9d9;
+  --blue:#0000ee;--blue-hi:#dcdcff;--amber:#ffe600;--amber-hi:#fff9b0;
+  --success:#007a33;--warn:#ff0000;--error:#ff0000;
+  --shadow-c:#000000;
+  --bw:2px;
+  --sh-sm:2px 2px 0 var(--shadow-c);--sh-md:3px 3px 0 var(--shadow-c);--sh-lg:4px 4px 0 var(--shadow-c);
+  --r-sm:0px;--r-md:0px;--r-lg:0px;--r-xl:0px;--r-full:0px;
+  --font:ui-sans-serif,Helvetica,Arial,sans-serif;--disp:ui-sans-serif,Helvetica,Arial,sans-serif;
+  --ease:60ms linear;
+}
+[data-theme="brutal"] body{letter-spacing:-.005em;}
+[data-theme="brutal"] .home-hero h1,[data-theme="brutal"] .home-sec h2,[data-theme="brutal"] .panel-title,
+[data-theme="brutal"] .mode-logo-text,[data-theme="brutal"] .resume-name{
+  text-transform:uppercase;letter-spacing:-.02em;font-weight:800;
+}
+[data-theme="brutal"] .eyebrow,[data-theme="brutal"] .sec-num,[data-theme="brutal"] .kv-date,
+[data-theme="brutal"] .home-badge,[data-theme="brutal"] .pill,[data-theme="brutal"] .status-dot{
+  font-family:ui-monospace,'SF Mono','Cascadia Code',Consolas,monospace;
+}
+[data-theme="brutal"] .home-badge,[data-theme="brutal"] .pill{border-radius:0;letter-spacing:0;}
+[data-theme="brutal"] .btn,[data-theme="brutal"] input,[data-theme="brutal"] select,
+[data-theme="brutal"] textarea,[data-theme="brutal"] .card,[data-theme="brutal"] .resume-kv,
+[data-theme="brutal"] .term-chip,[data-theme="brutal"] .coach-item,[data-theme="brutal"] .ver-row{border-radius:0!important;}
+[data-theme="brutal"] .mode-bar{background:var(--bg);border-bottom:3px solid var(--border);}
+[data-theme="brutal"] .mode-logo-text{color:var(--text);text-shadow:none;}
+[data-theme="brutal"] .mode-logo-sub{color:var(--muted);}
+[data-theme="brutal"] .mode-tab.active{background:var(--primary);color:#fff;}
+[data-theme="brutal"] section.card[style*="linear-gradient"]{background:var(--surface)!important;}
+[data-theme="brutal"] .sec-btn.active{background:var(--primary-hi);}
+[data-theme="brutal"] :focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
+*,*::before,*::after{box-sizing:border-box;}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:var(--font);}
+body{line-height:1.55;font-size:var(--text-base);}
+button,input,select,textarea{font:inherit;color:inherit;}
+button{cursor:pointer;}a{color:inherit;}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
+
+/* MODE BAR */
+.mode-bar{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:var(--sp3);padding:.6rem var(--sp6);background:var(--blue);border-bottom:var(--bw) solid var(--border);}
+.mode-logo{display:flex;align-items:center;gap:var(--sp3);margin-right:var(--sp4);}
+.mode-logo-icon{width:34px;height:34px;border-radius:var(--r-md);background:var(--surface);color:var(--text);display:grid;place-items:center;flex-shrink:0;border:var(--bw) solid var(--border);box-shadow:var(--sh-sm);}
+.mode-logo-icon svg{width:18px;height:18px;}
+.mode-logo-text{font:800 var(--text-sm)/1 var(--disp);color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.25);}
+.mode-logo-sub{font-size:var(--text-xs);color:#0a2230;font-weight:700;margin-top:.12rem;}
+.mode-tabs{display:flex;gap:.4rem;background:transparent;border:none;padding:0;}
+.mode-tab{padding:.5rem 1rem;border-radius:var(--r-md);border:var(--bw) solid var(--border);background:var(--surface);font-size:var(--text-sm);font-weight:700;color:var(--text);transition:transform var(--ease);display:flex;align-items:center;gap:.4rem;box-shadow:var(--sh-sm);}
+.mode-tab:hover{transform:translate(-1px,-1px);}
+.mode-tab.active{background:var(--amber);color:#111;}
+.mode-tab svg{width:14px;height:14px;}
+.mode-bar-right{margin-left:auto;display:flex;align-items:center;gap:.4rem;}
+.header-link{display:inline-flex;align-items:center;gap:.4rem;text-decoration:none;}
+.header-link-text{font-size:var(--text-xs);}
+
+/* BUILD LAYOUT */
+.build-app{display:grid;grid-template-columns:252px 1.2fr 1fr;height:calc(100vh - 58px);}
+.sidebar{background:var(--surface2);border-right:var(--bw) solid var(--divider);padding:var(--sp5);display:flex;flex-direction:column;overflow-y:auto;height:100%;}
+.build-main,.build-preview{overflow-y:auto;height:100%;}
+.build-main{padding:var(--sp6) var(--sp6) var(--sp8);}
+.build-preview{border-left:var(--bw) solid var(--divider);background:var(--bg);padding:var(--sp5);}
+
+/* SIDEBAR */
+.brand{display:flex;gap:var(--sp3);align-items:center;margin-bottom:var(--sp5);}
+.brand h2{font:800 var(--text-sm)/1.1 var(--disp);margin:0;}
+.brand p{margin:.12rem 0 0;color:var(--muted);font-size:var(--text-xs);font-weight:600;}
+.sec-nav{display:grid;gap:.4rem;flex:1;}
+.sec-btn{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;padding:.62rem .8rem;border-radius:var(--r-md);border:var(--bw) solid transparent;background:transparent;transition:all var(--ease);gap:var(--sp2);font-weight:700;}
+.sec-btn:hover{background:var(--surface);border-color:var(--border);}
+.sec-btn.active{background:var(--primary);border-color:var(--border);color:#fff;box-shadow:var(--sh-sm);}
+.sec-btn.active .ni,.sec-btn.active .sec-num{opacity:1;color:#fff;}
+.sec-label{display:flex;align-items:center;gap:.5rem;font-size:var(--text-sm);font-weight:700;text-align:left;min-width:0;}
+.sec-label span{line-height:1.15;}
+.sec-label .ni{flex-shrink:0;}
+.ni{width:14px;height:14px;opacity:.65;flex-shrink:0;}
+.sec-num{color:var(--faint);font-size:var(--text-xs);margin-left:auto;font-weight:800;}
+.sec-btn.active .sec-num{color:#ffe0cc;}
+.sb-footer{margin-top:var(--sp5);padding-top:var(--sp4);border-top:var(--bw) solid var(--divider);display:grid;gap:var(--sp3);}
+
+/* SCORE MODE */
+.score-app{max-width:880px;margin:0 auto;padding:var(--sp8) var(--sp6) var(--sp8);}
+.score-hero{text-align:center;margin-bottom:var(--sp8);}
+.score-hero h2{font:800 var(--text-xl)/1.1 var(--disp);margin:.35rem 0 .55rem;color:var(--text);}
+.score-hero p{color:var(--faint);font-size:var(--text-sm);max-width:50ch;margin:0 auto;}
+.score-hero .eyebrow{color:var(--amber);}
+.disc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp4);margin-bottom:var(--sp6);}
+.disc-card{border:var(--bw) solid var(--border);border-radius:var(--r-lg);padding:var(--sp5);background:var(--surface);text-align:center;cursor:pointer;transition:transform var(--ease);display:grid;gap:var(--sp3);justify-items:center;box-shadow:var(--sh-sm);}
+.disc-card:hover{transform:translate(-2px,-2px);box-shadow:var(--sh-md);}
+.disc-card.selected{background:var(--amber);color:#111;box-shadow:var(--sh-md);}
+.disc-icon{width:50px;height:50px;border-radius:var(--r-lg);background:var(--surface2);border:var(--bw) solid var(--border);display:grid;place-items:center;transition:all var(--ease);}
+.disc-card.selected .disc-icon{background:var(--surface);}
+.disc-icon svg{width:24px;height:24px;stroke:var(--text);}
+.disc-name{font:800 var(--text-sm)/1.2 var(--disp);}
+.disc-sub{font-size:var(--text-xs);color:var(--muted);font-weight:600;}
+.disc-card.selected .disc-sub{color:#3a2200;}
+.score-results{display:none;margin-top:var(--sp8);animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.score-banner{border-radius:var(--r-xl);padding:var(--sp6);margin-bottom:var(--sp6);background:var(--surface);border:var(--bw) solid var(--border);box-shadow:var(--sh-md);display:flex;gap:var(--sp6);align-items:center;flex-wrap:wrap;}
+.score-ring{width:96px;height:96px;flex-shrink:0;position:relative;display:grid;place-items:center;}
+.score-ring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);}
+.score-ring-num{font:800 1.7rem/1 var(--disp);color:var(--text);}
+.score-ring-sub{font-size:var(--text-xs);color:var(--muted);margin-top:.15rem;font-weight:700;}
+.score-meta h3{font:800 var(--text-lg)/1.1 var(--disp);margin:0 0 .35rem;}
+.score-meta p{margin:0;color:var(--muted);font-size:var(--text-sm);}
+.score-verdict{display:inline-flex;align-items:center;gap:.4rem;margin-top:.55rem;font-size:var(--text-xs);font-weight:800;padding:.3rem .8rem;border-radius:var(--r-md);border:2px solid var(--border);}
+.section-scores{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp4);margin-bottom:var(--sp6);}
+.sec-score-card{background:var(--surface);border:var(--bw) solid var(--border);border-radius:var(--r-lg);padding:var(--sp4);box-shadow:var(--sh-sm);}
+.sec-score-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:var(--sp3);}
+.sec-score-name{font-weight:800;font-size:var(--text-sm);}
+.sec-score-denom{font-size:var(--text-xs);color:var(--faint);}
+.sec-score-num{font:800 1.5rem/1 var(--disp);}
+.sec-score-bar{height:10px;border-radius:var(--r-sm);background:var(--surface2);overflow:hidden;margin-bottom:var(--sp3);border:2px solid var(--border);}
+.sec-score-bar span{display:block;height:100%;transition:width .7s cubic-bezier(.16,1,.3,1);}
+.fb-item{display:flex;gap:.45rem;align-items:flex-start;font-size:var(--text-xs);line-height:1.5;margin-top:.3rem;color:var(--muted);font-weight:600;}
+.action-box{background:var(--surface);border:var(--bw) solid var(--border);border-radius:var(--r-xl);padding:var(--sp5);box-shadow:var(--sh-md);margin-bottom:var(--sp6);}
+.action-box h3{font:800 var(--text-base)/1 var(--disp);margin:0 0 var(--sp4);}
+.action-item{display:flex;gap:var(--sp3);align-items:flex-start;padding:var(--sp3) var(--sp4);border-radius:var(--r-md);border:2px solid var(--border);background:var(--surface2);margin-bottom:var(--sp3);}
+.action-item:last-child{margin-bottom:0;}
+.action-num{width:24px;height:24px;border-radius:var(--r-sm);background:var(--primary);color:#fff;font-size:var(--text-xs);font-weight:800;display:grid;place-items:center;flex-shrink:0;margin-top:.1rem;border:2px solid var(--border);}
+.action-text strong{display:block;color:var(--text);font-size:var(--text-sm);margin-bottom:.18rem;}
+.action-text span{color:var(--muted);font-size:var(--text-xs);line-height:1.5;font-weight:600;}
+
+/* SHARED */
+.eyebrow{color:var(--blue);font-size:var(--text-xs);font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
+.card{background:var(--surface);border:var(--bw) solid var(--border);border-radius:var(--r-lg);box-shadow:var(--sh-sm);padding:var(--sp4) var(--sp5);}
+.btn{border:var(--bw) solid var(--border);background:var(--surface);color:var(--text);padding:.62rem .95rem;border-radius:var(--r-md);box-shadow:var(--sh-sm);transition:transform var(--ease),box-shadow var(--ease);min-height:40px;font-size:var(--text-sm);font-weight:800;display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap;}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:var(--sh-md);}
+.btn:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--shadow-c);}
+.btn.primary{background:var(--primary);color:#fff;}
+.btn.primary:hover{background:var(--primary-h);}
+.btn.ghost{background:var(--surface2);box-shadow:none;}
+.btn.ghost:hover{background:var(--surface);box-shadow:var(--sh-sm);}
+.pill{display:inline-flex;align-items:center;gap:.3rem;border-radius:var(--r-sm);padding:.24rem .62rem;font-size:var(--text-xs);font-weight:800;border:2px solid var(--border);}
+.pill.pass{background:#c9f2d6;color:#0d5c2a;}
+.pill.warn{background:var(--amber-hi);color:#8a4300;}
+.pill.info{background:var(--blue-hi);color:#04435f;}
+.field{display:grid;gap:.38rem;}
+.field label{font-size:var(--text-xs);color:var(--muted);font-weight:700;letter-spacing:.02em;}
+input:not([type=checkbox]):not([type=range]):not([type=file]):not([type=color]),select,textarea{width:100%;min-height:44px;border-radius:var(--r-md);border:var(--bw) solid var(--border);background:var(--surface);padding:.68rem .85rem;transition:box-shadow var(--ease);font-size:var(--text-sm);font-weight:600;}
+textarea{min-height:110px;resize:vertical;}
+input:focus,select:focus,textarea:focus{box-shadow:3px 3px 0 var(--blue);outline:none;}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23111' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .8rem center;padding-right:2rem;}
+.progress{height:10px;border-radius:var(--r-sm);background:var(--surface2);overflow:hidden;border:2px solid var(--border);}
+.progress>span{display:block;height:100%;background:var(--amber);transition:width .5s ease;}
+.diag-item{display:flex;gap:var(--sp3);align-items:flex-start;padding:.78rem 1rem;border:2px solid var(--border);border-radius:var(--r-md);background:var(--surface);}
+.diag-item p{margin:0;color:var(--muted);font-size:var(--text-sm);font-weight:600;}
+.hint{padding:.72rem 1rem;border-radius:var(--r-md);border:2px dashed var(--border);background:var(--blue-hi);color:#0a3446;font-size:var(--text-xs);font-weight:700;}
+.panel-header{display:flex;justify-content:space-between;gap:var(--sp4);align-items:flex-start;margin-bottom:var(--sp4);}
+.panel-title{margin:0;font-size:var(--text-base);font-weight:800;font-family:var(--disp);}
+.panel-note{margin:.28rem 0 0;color:var(--muted);font-size:var(--text-xs);font-weight:600;}
+.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp4);}
+.field.full{grid-column:1/-1;}
+.entry{border:var(--bw) solid var(--border);border-radius:var(--r-lg);padding:var(--sp4);background:var(--surface2);display:grid;gap:var(--sp4);}
+.entry-head{display:flex;align-items:center;justify-content:space-between;gap:var(--sp3);flex-wrap:wrap;}
+.entry-title{color:var(--muted);font-size:var(--text-xs);font-weight:800;letter-spacing:.04em;text-transform:uppercase;}
+.mini-btn{border:2px solid var(--border);background:var(--surface);border-radius:var(--r-sm);min-height:30px;padding:.28rem .62rem;font-size:var(--text-xs);font-weight:800;transition:all var(--ease);}
+.mini-btn:hover{background:var(--offset);}
+.workspace{display:grid;gap:var(--sp4);}
+.section-panel{display:none;}
+.section-panel.active{display:grid;gap:var(--sp4);animation:fadeUp .2s ease;}
+.stat-label{color:var(--muted);font-size:var(--text-xs);font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:.28rem;}
+.stat strong{display:block;font-size:1.35rem;font-family:var(--disp);font-weight:800;margin:.08rem 0 .18rem;}
+.stat span{color:var(--muted);font-size:var(--text-xs);font-weight:600;}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp3);margin-bottom:var(--sp5);}
+.top-bar{display:flex;justify-content:space-between;gap:var(--sp4);align-items:flex-start;margin-bottom:var(--sp5);}
+.hero h2{margin:.28rem 0 .38rem;font:800 var(--text-xl)/1.1 var(--disp);}
+.hero p{margin:0;color:var(--muted);max-width:55ch;font-size:var(--text-sm);font-weight:600;}
+.preview-shell{display:grid;gap:var(--sp4);max-width:700px;margin:0 auto;}
+.preview-toolbar{display:flex;justify-content:space-between;gap:var(--sp3);align-items:center;flex-wrap:wrap;}
+.preview-toolbar strong{color:var(--text);}
+
+/* RESUME PAPER — kept clean/professional; this is the printable document, not app chrome */
+.resume-paper{background:#fff;color:#1a1a1a;border-radius:4px;padding:var(--r-pad-y,1.8rem) var(--r-pad-x,2rem);box-shadow:0 18px 48px rgba(0,0,0,.35);min-height:860px;font-family:var(--r-body-font,'Satoshi',sans-serif);}
+.resume-header{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;border-bottom:var(--r-hrule-w,2.5px) solid var(--r-hrule-c,var(--resume-accent));padding-bottom:var(--r-head-pad,.85rem);margin-bottom:var(--r-head-gap,1.1rem);}
+.resume-name{margin:0;font:700 var(--r-name-size,1.7rem)/1 var(--r-head-font,var(--disp));letter-spacing:-.01em;color:var(--r-name-c,#1a1a1a);}
+.resume-role{margin:.28rem 0 0;color:#4a4a4a;font-size:var(--r-role-size,.86rem);line-height:1.5;}
+.resume-meta{text-align:right;font-size:var(--r-meta-size,.78rem);color:#4a4a4a;display:grid;gap:.1rem;}
+.resume-meta a{color:var(--resume-accent);text-decoration:none;}
+.resume-section{margin-bottom:var(--r-secgap,1rem);}
+.resume-section h3{margin:0 0 .42rem;font-size:var(--r-h3-size,.7rem);letter-spacing:var(--r-track,.1em);text-transform:uppercase;color:var(--r-head-c,var(--resume-accent));font-family:var(--r-head-font,var(--disp));font-weight:700;}
+.resume-section p,.resume-section li{margin:0;font-size:var(--r-fs,.84rem);line-height:var(--r-lead,1.5);color:#222;}
+.resume-list{display:grid;gap:.6rem;}
+.resume-list ul{margin:.26rem 0 0 1rem;padding:0;}
+.resume-list li+li{margin-top:.15rem;}
+.resume-kv{display:grid;gap:.1rem;}
+.resume-kv strong{font-size:var(--r-kv-size,.86rem);}
+.resume-kv .dloc{color:#666;font-size:var(--r-dloc-size,.77rem);}
+
+/* ── RESUME STYLE ENGINE ──────────────────────────────────────
+   Every visual variant is driven by data-* attributes and CSS vars set
+   from the single `resumeStyle` object. The PDF renderer reads the same
+   object, so preview and export cannot drift apart. */
+
+/* section heading treatments */
+[data-heading="ruleUnder"] .resume-section h3{border-bottom:var(--r-rule-w) solid var(--r-rule-c);padding-bottom:.2rem;}
+[data-heading="ruleAbove"] .resume-section h3{border-top:var(--r-rule-w) solid var(--r-rule-c);padding-top:.36rem;margin-top:.1rem;}
+[data-heading="bar"] .resume-section h3{border-left:3px solid var(--r-rule-c);padding-left:.45rem;}
+[data-heading="block"] .resume-section h3{background:var(--r-head-c);color:#fff;display:inline-block;padding:.2rem .55rem;border-radius:.25rem;letter-spacing:.14em;}
+[data-heading="plain"] .resume-section h3{letter-spacing:.2em;}
+
+/* name block */
+[data-name="left"] .resume-header{flex-direction:column;align-items:flex-start;}
+[data-name="left"] .resume-meta{text-align:left;display:flex;flex-wrap:wrap;gap:.05rem .6rem;margin-top:.45rem;}
+[data-name="center"] .resume-header{flex-direction:column;align-items:center;text-align:center;}
+[data-name="center"] .resume-meta{text-align:center;display:flex;flex-wrap:wrap;justify-content:center;gap:.05rem .6rem;margin-top:.45rem;}
+[data-name="split"] .resume-header{flex-direction:row;justify-content:space-between;align-items:flex-start;}
+[data-name="banner"] .resume-header{flex-direction:column;align-items:center;text-align:center;border-bottom:none;background:var(--r-banner-c);margin:calc(var(--r-pad-y) * -1) calc(var(--r-pad-x) * -1) var(--r-head-gap);padding:var(--r-pad-y) var(--r-pad-x) var(--r-head-pad);border-radius:4px 4px 0 0;}
+[data-name="banner"] .resume-meta{text-align:center;display:flex;flex-wrap:wrap;justify-content:center;gap:.05rem .6rem;margin-top:.45rem;}
+
+/* date placement */
+.kv-top{display:flex;justify-content:space-between;gap:1rem;align-items:baseline;}
+.kv-date{font-size:var(--r-dloc-size,.77rem);color:#666;white-space:nowrap;flex-shrink:0;}
+[data-date="inline"] .kv-date{display:none;}
+[data-date="right"] .d-dates,[data-date="right"] .d-sep{display:none;}
+.dloc:empty{display:none;}
+
+/* bullet glyph */
+.resume-section ul{list-style:none;margin:.26rem 0 0;padding:0;}
+.resume-section li{position:relative;padding-left:.95rem;}
+.resume-section li::before{content:var(--r-bullet,'\2022');position:absolute;left:0;top:0;color:var(--r-bullet-c,#555);}
+[data-bullet="none"] .resume-section li{padding-left:0;}
+[data-bullet="none"] .resume-section li::before{content:'';}
+
+/* preset picker */
+.preset-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp3);}
+.preset-card{border:var(--bw) solid var(--border);border-radius:var(--r-lg);padding:var(--sp3);cursor:pointer;background:var(--surface);box-shadow:var(--sh-sm);text-align:left;transition:transform var(--ease);}
+.preset-card:hover{transform:translate(-1px,-1px);}
+.preset-card.selected{background:var(--amber);}
+.preset-name{font-weight:800;font-size:var(--text-sm);margin-top:.4rem;}
+.preset-desc{font-size:var(--text-xs);color:var(--muted);font-weight:600;line-height:1.3;}
+.preset-card.selected .preset-desc{color:#4a3a00;}
+.mini-paper{background:#fff;border:1.5px solid #ddd;border-radius:2px;padding:5px;display:grid;gap:3px;height:52px;overflow:hidden;}
+.mini-paper i{display:block;background:#c9c9c9;height:2px;border-radius:1px;}
+.mini-paper i.n{height:5px;background:#333;width:60%;}
+.mini-paper i.h{height:3px;width:34%;}
+.knob-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--sp3);}
+.knob{display:grid;gap:.25rem;}
+.knob label{font-size:var(--text-xs);font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+.knob select{border:var(--bw) solid var(--border);border-radius:var(--r-sm);padding:.45rem .5rem;background:var(--surface);font-weight:700;font-size:var(--text-sm);min-height:40px;}
+@media(max-width:700px){.preset-grid{grid-template-columns:repeat(2,1fr);}}
+
+/* DESIGN PANEL */
+.tpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp3);}
+.tpl-card{border:var(--bw) solid var(--border);border-radius:var(--r-lg);padding:var(--sp3);cursor:pointer;text-align:center;transition:transform var(--ease);background:var(--surface);box-shadow:var(--sh-sm);}
+.tpl-card:hover{transform:translate(-2px,-2px);box-shadow:var(--sh-md);}
+.tpl-card.selected{background:var(--amber);color:#111;}
+.tpl-swatch{height:52px;border-radius:var(--r-sm);background:#fff;border:2px solid var(--border);margin-bottom:.5rem;display:grid;place-items:center;overflow:hidden;}
+.tpl-swatch .bar{width:70%;height:6px;border-radius:2px;}
+.tpl-name{font-size:var(--text-xs);font-weight:800;}
+.color-grid{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;}
+.color-swatch{width:32px;height:32px;border-radius:var(--r-sm);border:var(--bw) solid var(--border);cursor:pointer;transition:transform var(--ease);flex-shrink:0;}
+.color-swatch:hover{transform:translate(-1px,-1px);}
+.color-swatch.selected{box-shadow:var(--sh-sm);}
+.color-custom{display:flex;align-items:center;gap:.5rem;}
+.color-custom input[type=color]{width:36px;height:36px;padding:2px;min-height:unset;border-radius:var(--r-sm);border:var(--bw) solid var(--border);overflow:hidden;cursor:pointer;}
+
+
+/* ═══════════ v6 COMPONENTS ═══════════ */
+.upload-zone{display:flex;align-items:center;gap:var(--sp4);padding:var(--sp4);margin-bottom:.6rem;background:var(--surface);border:var(--bw) dashed var(--border);border-radius:var(--r-md);}
+.upload-zone strong{font-weight:800;display:block;}
+.upload-ico{width:38px;height:38px;flex-shrink:0;display:grid;place-items:center;border:2px solid var(--border);border-radius:var(--r-md);background:var(--blue-hi);}
+.upload-ico svg{width:20px;height:20px;}
+.upload-zone>div:nth-child(2){flex:1;min-width:0;}
+.file-status{font-size:var(--text-xs);font-weight:600;color:var(--muted);margin-bottom:var(--sp3);}
+.file-status:empty{display:none;}
+.file-status.good{color:var(--success);}
+.file-status.bad{color:var(--error);}
+@media(max-width:700px){.upload-zone{flex-direction:column;align-items:stretch;text-align:left;}.upload-zone .btn{justify-content:center;}}
+.term-wrap{display:flex;flex-wrap:wrap;gap:.35rem;}
+.term-chip{display:inline-flex;align-items:center;gap:.25rem;padding:.22rem .6rem;border:2px solid var(--border);border-radius:var(--r-full);font-size:var(--text-xs);font-weight:700;}
+.term-chip.hit{background:color-mix(in srgb,var(--success) 18%,var(--surface));}
+.term-chip.miss{background:color-mix(in srgb,var(--error) 16%,var(--surface));}
+.term-chip em{font-style:normal;opacity:.6;font-weight:800;}
+.jd-head{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--sp4);}
+.imp-row{display:flex;justify-content:space-between;gap:var(--sp4);padding:.32rem 0;border-bottom:1px dashed var(--offset);font-size:var(--text-sm);}
+.imp-row span{color:var(--muted);font-weight:600;}
+.imp-row strong{text-align:right;font-weight:800;}
+.rb-toast{position:fixed;left:50%;bottom:1.4rem;transform:translate(-50%,140%);background:var(--surface);color:var(--text);border:var(--bw) solid var(--border);border-radius:var(--r-md);box-shadow:var(--sh-md);padding:.6rem 1rem;font-weight:800;font-size:var(--text-sm);z-index:400;transition:transform .22s ease;pointer-events:none;}
+.rb-toast.show{transform:translate(-50%,0);}
+.ver-row{display:flex;gap:var(--sp3);justify-content:space-between;align-items:flex-start;flex-wrap:wrap;border:var(--bw) solid var(--border);border-radius:var(--r-md);padding:var(--sp3);background:var(--surface);box-shadow:var(--sh-sm);}
+.ver-row.active{background:var(--primary-hi);}
+.ver-main{flex:1 1 260px;display:grid;gap:.4rem;}
+.ver-name{font-weight:800;border:2px solid var(--border);border-radius:var(--r-sm);padding:.35rem .5rem;background:var(--surface);width:100%;}
+.ver-meta{display:grid;grid-template-columns:1fr 1fr auto;gap:.35rem;}
+.ver-meta input,.ver-meta select{border:2px solid var(--border);border-radius:var(--r-sm);padding:.3rem .45rem;font-size:var(--text-xs);background:var(--surface);min-width:0;}
+.ver-date{font-size:var(--text-xs);color:var(--muted);font-weight:600;display:flex;align-items:center;gap:.3rem;}
+.ver-acts{display:flex;gap:.3rem;flex-wrap:wrap;align-items:flex-start;}
+.status-dot{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--border);display:inline-block;background:var(--offset);}
+.status-dot.s-applied{background:var(--blue);}.status-dot.s-interviewing{background:var(--amber);}
+.status-dot.s-offer{background:var(--success);}.status-dot.s-rejected{background:var(--error);}
+.coach-item{border:var(--bw) solid var(--border);border-radius:var(--r-md);padding:var(--sp3);background:var(--surface);box-shadow:var(--sh-sm);display:grid;gap:.4rem;}
+.coach-b{font-weight:700;font-size:var(--text-sm);}
+.coach-meta{font-size:var(--text-xs);color:var(--faint);font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
+.coach-issue{display:flex;gap:.5rem;align-items:flex-start;}
+.coach-issue p{margin:0;font-size:var(--text-xs);color:var(--muted);font-weight:600;}
+.coach-sug{margin-top:.4rem;padding:.5rem .6rem;border:2px dashed var(--border);border-radius:var(--r-sm);font-size:var(--text-sm);background:var(--surface2);}
+.active-ver{display:flex;align-items:center;gap:.4rem;font-size:var(--text-xs);font-weight:700;color:var(--muted);margin-top:.35rem;}
+.active-ver strong{color:var(--text);font-weight:800;}
+.tool-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+@media(max-width:700px){.ver-meta{grid-template-columns:1fr;}.jd-head{flex-direction:column;}}
+
+/* ═══════════ HOME / LANDING ═══════════ */
+.home-app{max-width:1000px;margin:0 auto;padding:var(--sp8) var(--sp6) 4rem;}
+.home-hero{background:var(--surface);border:var(--bw) solid var(--border);border-radius:var(--r-xl);box-shadow:var(--sh-lg);padding:var(--sp8) var(--sp6);text-align:center;}
+.home-hero h1{margin:.5rem 0 .6rem;font:800 clamp(1.7rem,1.2rem + 2.4vw,2.8rem)/1.05 var(--disp);letter-spacing:-.02em;}
+.home-hero p.lead{margin:0 auto;max-width:56ch;color:var(--muted);font-weight:600;font-size:var(--text-base);}
+.home-cta{display:flex;gap:var(--sp3);justify-content:center;flex-wrap:wrap;margin-top:var(--sp6);}
+.home-cta .btn{min-height:46px;padding:.7rem 1.3rem;font-weight:800;}
+.home-sec{margin-top:var(--sp8);}
+.home-sec h2{font:800 var(--text-lg)/1.15 var(--disp);margin:0 0 .3rem;}
+.home-sec p.sub{margin:0 0 var(--sp5);color:var(--muted);font-size:var(--text-sm);font-weight:600;}
+.home-grid{display:grid;gap:var(--sp4);grid-template-columns:repeat(auto-fit,minmax(230px,1fr));}
+.home-card{background:var(--surface);border:var(--bw) solid var(--border);border-radius:var(--r-lg);box-shadow:var(--sh-sm);padding:var(--sp5);}
+.home-card h3{margin:.5rem 0 .35rem;font:800 var(--text-base)/1.2 var(--disp);}
+.home-card p{margin:0;font-size:var(--text-sm);color:var(--muted);font-weight:600;}
+.home-step{position:relative;padding-left:3.2rem;}
+.home-step .step-n{position:absolute;left:var(--sp5);top:var(--sp5);width:30px;height:30px;border-radius:var(--r-md);background:var(--amber);border:var(--bw) solid var(--border);display:grid;place-items:center;font:800 .85rem/1 var(--disp);color:#111;}
+.home-badge{display:inline-block;background:var(--amber);border:var(--bw) solid var(--border);border-radius:var(--r-full);padding:.22rem .8rem;font-size:var(--text-xs);font-weight:800;color:#111;}
+.home-note{margin-top:var(--sp6);background:var(--blue-hi);border:var(--bw) solid var(--border);border-radius:var(--r-lg);padding:var(--sp5);font-size:var(--text-sm);font-weight:600;}
+.site-footer{margin-top:var(--sp8);padding-top:var(--sp5);border-top:var(--bw) solid var(--divider);text-align:center;}
+.site-footer p{margin:0 0 .3rem;font-size:var(--text-xs);color:var(--muted);font-weight:600;}
+.site-footer strong{color:var(--text);font-weight:800;}
+.home-note strong{font-weight:800;}
+.mode-logo{background:none;border:none;padding:0;text-align:left;cursor:pointer;}
+.mode-logo:hover .mode-logo-icon{transform:translate(-1px,-1px);}
+.mode-logo-icon{transition:transform var(--ease);}
+
+/* ═══════════ MOBILE CHROME (hidden on desktop) ═══════════ */
+.mob-bar{display:none;}
+.mob-view-toggle{display:flex;gap:.4rem;}
+.mob-view-toggle button{flex:1;min-height:42px;border:var(--bw) solid var(--border);border-radius:var(--r-md);background:var(--surface);font-weight:800;font-size:var(--text-sm);box-shadow:var(--sh-sm);}
+.mob-view-toggle button.active{background:var(--amber);color:#111;}
+.mob-sec-nav{display:flex;gap:.4rem;overflow-x:auto;padding:.15rem .15rem .5rem;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.mob-sec-nav::-webkit-scrollbar{display:none;}
+.mob-chip{flex:0 0 auto;min-height:40px;padding:.45rem .85rem;border:var(--bw) solid var(--border);border-radius:var(--r-full);background:var(--surface);font-size:var(--text-xs);font-weight:800;white-space:nowrap;box-shadow:2px 2px 0 var(--shadow-c);}
+.mob-chip.active{background:var(--primary);color:#fff;}
+.mob-actions{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;}
+.mob-actions .btn{min-height:44px;justify-content:center;font-size:var(--text-xs);}
+
+@media print{
+  .mode-bar,.sidebar,.build-main,.preview-toolbar,.score-app,.mob-bar,#mode-home{display:none!important;}
+  .build-app{display:block!important;}
+  .build-preview{all:unset!important;display:block!important;}
+  .preview-shell{max-width:none!important;padding:0!important;}
+  .resume-paper{box-shadow:none!important;border-radius:0!important;padding:0!important;min-height:auto!important;}
+  @page{margin:1.2cm 1.4cm;}
+}
+@media(max-width:1100px){
+  .build-app{grid-template-columns:66px 1fr;}
+  .build-preview{grid-column:1/-1;height:auto;border-left:none;border-top:var(--bw) solid var(--divider);}
+  .brand,.sec-label span,.sb-footer .btn span{display:none;}
+  .sec-btn{justify-content:center;padding:.68rem;}
+  .stats{grid-template-columns:repeat(2,1fr);}
+  .disc-grid{grid-template-columns:1fr;}
+  .section-scores{grid-template-columns:1fr;}
+}
+@media(max-width:700px){
+  /* layout unstacks completely — no fixed-height panes on a phone */
+  .build-app{display:block;height:auto;}
+  .sidebar{display:none;}
+  .build-main,.build-preview{height:auto;overflow:visible;}
+  .build-main{padding:var(--sp4) var(--sp4) var(--sp8);}
+  .build-preview{border-left:none;border-top:var(--bw) solid var(--divider);padding:var(--sp4);}
+
+  /* mobile control bar replaces the hidden sidebar */
+  .mob-bar{display:grid;gap:.5rem;position:sticky;top:52px;z-index:60;
+    background:var(--bg);border-bottom:var(--bw) solid var(--divider);padding:.6rem var(--sp4);}
+  body.mob-preview .build-main{display:none;}
+  body.mob-preview .mob-sec-nav{display:none;}
+  body:not(.mob-preview) .build-preview{display:none;}
+
+  .field-grid,.stats{grid-template-columns:1fr;}
+  .stats{gap:.5rem;}
+  .top-bar{flex-direction:column;align-items:stretch;}
+  .top-bar .btn{justify-content:center;}
+  .disc-grid,.section-scores,.tpl-grid{grid-template-columns:1fr;}
+  .score-banner{flex-direction:column;text-align:center;}
+  .score-app{padding:var(--sp5) var(--sp4) var(--sp8);}
+
+  /* header: drop the tagline, tighten tabs so nothing clips */
+  .mode-bar{padding:.45rem var(--sp3);gap:.4rem;}
+  .header-link-text{display:none;}
+  .header-link,.mode-bar-right .btn{padding:.5rem;min-width:36px;justify-content:center;}
+  .mode-logo{margin-right:0;gap:.5rem;}
+  .mode-logo-sub{display:none;}
+  .mode-tab{padding:.45rem .6rem;font-size:var(--text-xs);}
+  .mode-tab span.tab-full{display:none;}
+
+  /* preview paper: readable at phone width instead of a shrunk A4 */
+  .preview-shell{max-width:none;}
+  .resume-paper{padding:1.15rem 1.15rem;min-height:auto;box-shadow:0 8px 24px rgba(0,0,0,.28);}
+  .resume-header{flex-direction:column;gap:.5rem;}
+  .resume-meta{text-align:left;}
+  .resume-paper.tpl-modern .resume-header{margin:-1.15rem -1.15rem 1rem;padding:1.15rem;}
+  .resume-name{font-size:1.35rem;}
+
+  /* thumb-friendly targets */
+  input,textarea,select{min-height:44px;font-size:16px;} /* 16px stops iOS zoom-on-focus */
+  .btn{min-height:44px;}
+  .mini-btn{min-height:36px;}
+}
+@media(max-width:430px){
+  .mob-actions{grid-template-columns:1fr;}
+  .home-app{padding:var(--sp5) var(--sp4) 3rem;}
+  .home-hero{padding:var(--sp6) var(--sp4);}
+  .mode-logo-text{font-size:var(--text-xs);}
+}
+</style>
+</head>
+<body>
+
+<!-- MODE BAR -->
+<header class="mode-bar">
+  <button class="mode-logo" onclick="switchMode('home')" title="Go to home / how it works" aria-label="Home">
+    <div class="mode-logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17V7l7 10 7-10v10"></path><path d="M8 13h8"></path></svg>
+    </div>
+    <div><div class="mode-logo-text">AEC Resume Toolkit</div><div class="mode-logo-sub">by Ar. Neeraj</div></div>
+  </button>
+  <div class="mode-tabs" role="tablist">
+    <button class="mode-tab active" id="tab-build" onclick="switchMode(&#39;build&#39;)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="12" height="12" rx="2"></rect><path d="M5 8h6M5 11h3M8 5h3"></path></svg>
+      Build<span class="tab-full">&nbsp;Resume</span>
+    </button>
+    <button class="mode-tab" id="tab-score" onclick="switchMode(&#39;score&#39;)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6"></circle><path d="M8 5v3l2 2"></path></svg>
+      Score<span class="tab-full">&nbsp;My Resume</span>
+    </button>
+  </div>
+  <div class="mode-bar-right">
+    <a class="btn ghost header-link" href="https://www.linkedin.com/in/neeraj1003" target="_blank" rel="noopener noreferrer" title="Connect on LinkedIn" aria-label="LinkedIn profile">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.15 1.45-2.15 2.94v5.67H9.33V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 11.01-4.13 2.07 2.07 0 01-.01 4.13zM7.12 20.45H3.56V9h3.56v11.45z"></path></svg>
+      <span class="header-link-text">LinkedIn</span>
+    </a>
+    <a class="btn ghost header-link" href="mailto:neerajdesk@gmail.com" title="Email me" aria-label="Send an email">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1z"></path><path d="M3 6l9 7 9-7"></path></svg>
+      <span class="header-link-text">Email</span>
+    </a>
+    <button class="btn ghost" onclick="toggleTheme()" title="Toggle theme">
+      <svg id="themeIcon" width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7" cy="7" r="3"></circle><path d="M7 1v1M7 12v1M1 7h1M12 7h1M2.9 2.9l.7.7M10.4 10.4l.7.7M2.9 11.1l.7-.7M10.4 3.6l.7-.7"></path></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ════════════════ HOME ════════════════ -->
+<div id="mode-home" style="display:none;">
+<div class="home-app">
+
+  <section class="home-hero">
+    <span class="home-badge">For architects, civil &amp; MEP engineers</span>
+    <h1>Write a resume that survives the ATS.</h1>
+    <p class="lead">A free, browser-based toolkit that builds a clean, machine-readable AEC resume — and then scores it honestly against your discipline and the job you actually want.</p>
+    <div class="home-cta">
+      <button class="btn primary" onclick="switchMode('build')">Build a resume →</button>
+      <button class="btn" onclick="switchMode('score')">Score an existing one</button>
+    </div>
+    <p class="panel-note" style="margin-top:var(--sp4);">Built by <strong>Ar. Neeraj</strong>, an architect — for architects, civil and MEP engineers.</p>
+  </section>
+
+  <section class="home-sec">
+    <h2>What this actually does</h2>
+    <p class="sub">Two tools, one file. No account, no upload, no waiting.</p>
+    <div class="home-grid">
+      <article class="home-card">
+        <span class="home-badge">Import</span>
+        <h3>Start from your old resume</h3>
+        <p>Paste your existing resume and it is split into editable fields — contact, roles, bullets, education, skills. No retyping from a blank page.</p>
+      </article>
+      <article class="home-card">
+        <span class="home-badge">Build</span>
+        <h3>A live, ATS-safe editor</h3>
+        <p>Fill in sections on the left, watch the page redraw on the right. No tables, columns, or graphics — the things that make parsers drop half your resume.</p>
+      </article>
+      <article class="home-card">
+        <span class="home-badge">Design</span>
+        <h3>Six templates, and the knobs behind them</h3>
+        <p>Classic, Modern, Minimal, Editorial, Compact or Formal — then tune typeface, heading style, density, bullets and where the accent colour lands. Over 20,000 combinations, none of which break the underlying text structure.</p>
+      </article>
+      <article class="home-card">
+        <span class="home-badge">Score</span>
+        <h3>Discipline-aware feedback</h3>
+        <p>Architecture, Civil/Structural, and MEP are scored against different vocabularies — Revit and ASHRAE matter for one, IS codes and site work for another.</p>
+      </article>
+      <article class="home-card">
+        <span class="home-badge">Match</span>
+        <h3>Job-description matching</h3>
+        <p>Paste a live JD inside the builder and see exactly which requirements you have not covered — matched by meaning, so "managed a team" counts for "led a team".</p>
+      </article>
+      <article class="home-card">
+        <span class="home-badge">Coach</span>
+        <h3>Bullet-by-bullet feedback</h3>
+        <p>Flags weak openers, missing numbers, and bloat in every experience bullet — and asks the question that would fix it.</p>
+      </article>
+      <article class="home-card">
+        <span class="home-badge">Track</span>
+        <h3>One version per application</h3>
+        <p>Save a named version for each job, tag it with the company, and track it from Applied through to Offer or Rejected.</p>
+      </article>
+      <article class="home-card">
+        <span class="home-badge">Export</span>
+        <h3>Real PDF, real text</h3>
+        <p>Downloads a proper PDF with selectable text an ATS can read — not a screenshot. Auto-shrinks slightly to keep you on one page. Word export too.</p>
+      </article>
+      <article class="home-card">
+        <span class="home-badge">Private</span>
+        <h3>Nothing leaves your device</h3>
+        <p>Every calculation runs in your browser. Drafts save to this browser's local storage only — there's no server collecting your data.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="home-sec">
+    <h2>How to use it</h2>
+    <p class="sub">Ten minutes for a first draft, five more to sharpen it.</p>
+    <div class="home-grid">
+      <article class="home-card home-step"><span class="step-n">1</span>
+        <h3>Import or start fresh</h3>
+        <p>Paste an existing resume into the Import tab to pre-fill everything, or use Load sample to see what a finished one looks like, then Clear all.</p>
+      </article>
+      <article class="home-card home-step"><span class="step-n">2</span>
+        <h3>Fill the sections</h3>
+        <p>Work top to bottom through Basic Info to Education — the tabs run in the same order as the finished resume. Every bullet should start with an action verb, and at least one per role should carry a number.</p>
+      </article>
+      <article class="home-card home-step"><span class="step-n">3</span>
+        <h3>Run the bullet coach</h3>
+        <p>At the bottom of the Experience tab. It reads every bullet and tells you which ones hide the work behind "responsible for" or forgot the number.</p>
+      </article>
+      <article class="home-card home-step"><span class="step-n">4</span>
+        <h3>Paste the job description</h3>
+        <p>The Job Match tab shows what the role asks for that your resume does not yet say. Add missing terms only where they are genuinely true.</p>
+      </article>
+      <article class="home-card home-step"><span class="step-n">5</span>
+        <h3>Check Diagnostics</h3>
+        <p>Grades contact completeness, summary depth, verb quality, and quantified outcomes. Clear the warnings before you export.</p>
+      </article>
+      <article class="home-card home-step"><span class="step-n">6</span>
+        <h3>Pick a template</h3>
+        <p>The Design tab has six presets plus a Shuffle button. Modern reads well for design roles; Formal or Minimal are safest for large corporate portals. Everything you see there is what the PDF exports.</p>
+      </article>
+      <article class="home-card home-step"><span class="step-n">7</span>
+        <h3>Export and save a version</h3>
+        <p>Export PDF downloads straight away — no print dialog. Then save the whole thing as a named version in the Versions tab, tagged with the company you sent it to.</p>
+      </article>
+    </div>
+  </section>
+
+  <div class="home-note">
+    <p style="margin:0 0 .5rem;"><strong>A word on how the scoring works.</strong> The built-in scorer is a rules engine: it looks for structure, action verbs, numbers, and discipline keywords, and it understands a few hundred AEC synonyms so wording differences do not cost you points. It is fast, free, and completely offline — but it can still be gamed, and it cannot tell good writing from bad writing that happens to contain the right nouns.</p>
+    <p style="margin:0 0 .5rem;"><strong>And a word on the importer.</strong> It reads your resume by looking for section headings. It gets most of it right and some of it wrong — always walk through each tab afterwards and fix what landed in the wrong field.</p>
+    <p style="margin:0;">If you want judgement rather than pattern-matching, the Score tab has an optional field for your own Anthropic API key. That sends your resume text to Anthropic directly from your browser and returns written feedback. It's entirely optional — the tool works fully without it.</p>
+  </div>
+
+  <div class="home-cta" style="margin-top:var(--sp8);">
+    <button class="btn primary" onclick="switchMode('build')">Start building →</button>
+    <button class="btn" onclick="switchMode('score')">Score my resume</button>
+  </div>
+
+  <footer class="site-footer">
+    <p>Built by <strong>Ar. Neeraj</strong> · <span id="footYear"></span></p>
+    <p>Runs entirely in your browser. Nothing you type is uploaded or stored anywhere but this device.</p>
+  </footer>
+
+</div>
+</div>
+
+<!-- ════════════════ BUILD MODE ════════════════ -->
+<div id="mode-build">
+<div class="build-app">
+
+  <!-- mobile-only control bar: replaces the sidebar below 700px -->
+  <div class="mob-bar">
+    <div class="mob-view-toggle">
+      <button id="mobViewEdit" class="active" onclick="setMobView('edit')">✎ Edit</button>
+      <button id="mobViewPreview" onclick="setMobView('preview')">▤ Preview</button>
+    </div>
+    <nav class="mob-sec-nav" id="mobSecNav">
+      <button class="mob-chip" data-s="import">01 Import</button>
+      <button class="mob-chip active" data-s="basic">02 Basic Info</button>
+      <button class="mob-chip" data-s="summary">03 Professional Summary</button>
+      <button class="mob-chip" data-s="skills">04 Skills</button>
+      <button class="mob-chip" data-s="experience">05 Experience</button>
+      <button class="mob-chip" data-s="projects">06 Projects</button>
+      <button class="mob-chip" data-s="achievements">07 Achievements</button>
+      <button class="mob-chip" data-s="education">08 Education</button>
+      <button class="mob-chip" data-s="design">09 Design</button>
+      <button class="mob-chip" data-s="jobmatch">10 Job Match</button>
+      <button class="mob-chip" data-s="diagnostics">11 Diagnostics</button>
+      <button class="mob-chip" data-s="versions">12 Versions</button>
+    </nav>
+    <div class="mob-actions">
+      <button class="btn primary" onclick="doPrint()">Export PDF</button>
+      <button class="btn" onclick="exportWord()">Export Word</button>
+      <button class="btn ghost" onclick="saveDraft(true)" style="grid-column:1/-1;"><span id="draftStatusMob">Save draft</span></button>
+    </div>
+  </div>
+
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div style="width:30px;height:30px;border-radius:6px;background:var(--amber);color:#111;display:grid;place-items:center;flex-shrink:0;border:2px solid var(--border);"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="2" width="12" height="12" rx="2"></rect><path d="M5 8h6M5 11h3"></path></svg></div>
+      <div><h2>Build Resume</h2><p>AEC-ready profile</p></div>
+    </div>
+    <nav class="sec-nav" id="secNav">
+      <button class="sec-btn" data-s="import"><span class="sec-label"><svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2v7M5 6l3 3 3-3M2 11v1.5A1.5 1.5 0 003.5 14h9a1.5 1.5 0 001.5-1.5V11"></path></svg><span>Import</span></span><small class="sec-num">01</small></button>
+      <button class="sec-btn active" data-s="basic"><span class="sec-label"><svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="5" r="3"></circle><path d="M2 14c0-3.31 2.686-6 6-6s6 2.69 6 6"></path></svg><span>Basic Info</span></span><small class="sec-num">02</small></button>
+      <button class="sec-btn" data-s="summary"><span class="sec-label"><svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="12" height="12" rx="2"></rect><path d="M5 6h6M5 9h4"></path></svg><span>Professional Summary</span></span><small class="sec-num">03</small></button>
+      <button class="sec-btn" data-s="skills"><span class="sec-label"><svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2v2M8 12v2M3.5 3.5l1.5 1.5M11 11l1.5 1.5M2 8h2M12 8h2M3.5 12.5L5 11M11 5l1.5-1.5"></path></svg><span>Skills</span></span><small class="sec-num">04</small></button>
+      <button class="sec-btn" data-s="experience"><span class="sec-label"><svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="5" width="12" height="9" rx="1.5"></rect><path d="M5 5V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1"></path></svg><span>Experience</span></span><small class="sec-num">05</small></button>
+      <button class="sec-btn" data-s="projects"><span class="sec-label"><svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12L6 4l4 5 2-2 2 5H2z"></path></svg><span>Projects</span></span><small class="sec-num">06</small></button>
+      <button class="sec-btn" data-s="achievements"><span class="sec-label"><svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2l1.5 3.5L13 6l-2.5 2.5.6 3.5L8 10.5 4.9 12l.6-3.5L3 6l3.5-.5z"></path></svg><span>Achievements</span></span><small class="sec-num">07</small></button>
+      <button class="sec-btn" data-s="education"><span class="sec-label"><svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2L2 6l6 4 6-4-6-4zM2 6v4c0 1.66 2.686 3 6 3s6-1.34 6-3V6"></path></svg><span>Education</span></span><small class="sec-num">08</small></button>
+      <button class="sec-btn" data-s="design"><span class="sec-label"><svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12c0-5 3-9 9-9 3.3 0 5 2 5 4.2 0 2-1.5 3.3-3.3 3.3h-1.4c-1 0-1.6 1.2-.9 2 .4.4.4 1-.1 1.3-2.7 1.6-8.3.5-8.3-1.8z"></path><circle cx="5.5" cy="9" r=".9"></circle><circle cx="6.7" cy="6" r=".9"></circle><circle cx="10" cy="5" r=".9"></circle></svg><span>Design</span></span><small class="sec-num">09</small></button>
+      <button class="sec-btn" data-s="jobmatch"><span class="sec-label"><svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="4.5"></circle><path d="M10.5 10.5L14 14"></path></svg><span>Job Match</span></span><small class="sec-num">10</small></button>
+      <button class="sec-btn" data-s="diagnostics"><span class="sec-label"><svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6"></circle><path d="M8 5v3l2 2"></path></svg><span>Diagnostics</span></span><small class="sec-num">11</small></button>
+      <button class="sec-btn" data-s="versions"><span class="sec-label"><svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 3h6l2 2v8a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z"></path><path d="M6 7h4M6 10h3"></path></svg><span>Versions</span></span><small class="sec-num">12</small></button>
+    </nav>
+    <div class="sb-footer">
+      <button class="btn primary" onclick="doPrint()" title="Downloads a real text-based PDF (selectable text, ATS-readable)"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 1v7M4 5l3 3 3-3M2 10v1.5A1.5 1.5 0 003.5 13h7A1.5 1.5 0 0012 11.5V10"></path></svg><span>Export PDF</span></button>
+      <button class="btn" onclick="exportWord()"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="1.5" y="1.5" width="11" height="11" rx="1.5"></rect><path d="M4 5h6M4 7h6M4 9h4"></path></svg><span>Export Word (.doc)</span></button>
+      <button class="btn ghost" onclick="saveDraft(true)" style="min-height:32px;font-size:var(--text-xs);"><span id="draftStatus">Save draft</span></button>
+    </div>
+  </aside>
+
+  <main class="build-main">
+    <div class="top-bar">
+      <div class="hero"><div class="eyebrow">Live editor</div><h2>AEC-ready resume builder</h2><p>Edit any field — preview updates instantly.</p>
+        <div class="active-ver">Editing: <strong id="activeVerName">Unsaved draft</strong></div>
+        <div class="tool-row" style="margin-top:.6rem;">
+          <button class="btn ghost" onclick="loadSample()" style="min-height:34px;font-size:var(--text-xs);">Load sample</button>
+          <button class="btn ghost" onclick="clearAll()" style="min-height:34px;font-size:var(--text-xs);">Clear all</button>
+          <button class="btn ghost" onclick="selectSection('versions')" style="min-height:34px;font-size:var(--text-xs);">Versions (<span id="verCount">0</span>)</button>
+        </div>
+      </div>
+      <button class="btn primary" onclick="doPrint()" title="Downloads a real text-based PDF (selectable text, ATS-readable)"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 1v7M4 5l3 3 3-3M2 10v1.5A1.5 1.5 0 003.5 13h7A1.5 1.5 0 0012 11.5V10"></path></svg> Export PDF</button>
+    </div>
+    <div class="stats">
+      <article class="card stat"><div class="stat-label">Score</div><strong id="b-stat-score">78%</strong><span>Fill sections to update</span></article>
+      <article class="card stat"><div class="stat-label">Sections</div><strong id="b-stat-secs">7/7</strong><span>core sections filled</span></article>
+      <article class="card stat"><div class="stat-label">Page fit</div><strong>1 page</strong><span>ATS-safe layout</span></article>
+      <article class="card stat"><div class="stat-label">Format</div><strong>ATS ✓</strong><span>No tables or columns</span></article>
+    </div>
+    <div class="workspace">
+
+      <!-- 01 Basic -->
+
+      <!-- ── IMPORT ── -->
+      <div class="section-panel" id="panel-import">
+        <section class="card">
+          <div class="panel-header"><div><h3 class="panel-title">Import an existing resume</h3><p class="panel-note">Paste your current resume and it will be split into the builder's fields.</p></div></div>
+          <div class="hint">Keep your section headings in the text — lines like <strong>EXPERIENCE</strong>, <strong>EDUCATION</strong>, <strong>SKILLS</strong>. The parser navigates by those.</div>
+          <div class="upload-zone" style="margin-top:1rem;">
+            <div class="upload-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4"></path><path d="M3 16v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path></svg></div>
+            <div>
+              <strong>Upload a PDF</strong>
+              <p class="panel-note" style="margin:.15rem 0 0;">or a .txt / .md file. Read in your browser — nothing is uploaded.</p>
+            </div>
+            <label class="btn primary" style="cursor:pointer;white-space:nowrap;">Choose file<input type="file" accept=".pdf,.txt,.md,application/pdf,text/plain" onchange="handleResumeFile(this,'import-paste',true)" style="display:none;"></label>
+          </div>
+          <div id="importFileStatus" class="file-status"></div>
+          <div class="field" style="margin-top:1rem;"><label>Or paste the resume text</label>
+            <textarea id="import-paste" rows="10" placeholder="Paste your full resume text here…"></textarea>
+          </div>
+          <div class="tool-row" style="margin-top:.7rem;">
+            <button class="btn primary" onclick="runImport()">Parse resume</button>
+          </div>
+          <div id="importResult" style="margin-top:var(--sp4);"></div>
+        </section>
+      </div>
+      <div class="section-panel active" id="panel-basic">
+        <section class="card">
+          <div class="panel-header"><div><h3 class="panel-title">Basic Info</h3><p class="panel-note">Identity, target role, and contact details.</p></div></div>
+          <div class="field-grid">
+            <div class="field"><label>Full Name</label><input id="f-name" value="" oninput="syncPreview()"></div>
+            <div class="field"><label>Target Role</label><input id="f-role" value="" oninput="syncPreview()"></div>
+            <div class="field"><label>Phone</label><input id="f-phone" value="" oninput="syncPreview()"></div>
+            <div class="field"><label>Email</label><input id="f-email" value="" oninput="syncPreview()"></div>
+            <div class="field"><label>LinkedIn</label><input id="f-linkedin" value="" oninput="syncPreview()"></div>
+            <div class="field"><label>Location / Availability</label><input id="f-location" value="" oninput="syncPreview()"></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- 02 Summary -->
+      <div class="section-panel" id="panel-summary">
+        <section class="card">
+          <div class="panel-header"><div><h3 class="panel-title">Professional Summary</h3><p class="panel-note">Role-targeted, ATS-ready opening statement.</p></div></div>
+          <div class="hint">Mention your design focus, top 2–3 tools, and at least one measurable outcome.</div>
+          <div style="margin-top:1rem;"><div class="field"><label>Summary</label><textarea id="f-summary" rows="5" oninput="syncPreview()"></textarea></div></div>
+        </section>
+      </div>
+
+      <!-- 03 Education -->
+      <div class="section-panel" id="panel-education">
+        <section class="card">
+          <div class="panel-header"><div><h3 class="panel-title">Education</h3><p class="panel-note">Academic background with coursework and grading.</p></div><button class="btn" onclick="addEdu()">+ Add</button></div>
+          <div class="hint">Keep year format consistent. List coursework relevant to the target role.</div>
+          <div id="edu-entries" style="margin-top:1rem;display:grid;gap:1rem;"></div>
+        </section>
+      </div>
+
+      <!-- 04 Experience -->
+      <div class="section-panel" id="panel-experience">
+        <section class="card">
+          <div class="panel-header"><div><h3 class="panel-title">Experience</h3><p class="panel-note">Metric-backed bullets with dates and tools.</p></div><button class="btn" onclick="addExp()">+ Add</button></div>
+          <div class="hint">Lead every bullet with an action verb. Add at least one number per role.</div>
+          <div id="exp-entries" style="margin-top:1rem;display:grid;gap:1rem;"></div>
+        </section>
+      
+        <section class="card">
+          <div class="panel-header"><div><h3 class="panel-title">Bullet coach</h3><p class="panel-note">Checks every bullet for weak openers, missing numbers, and bloat.</p></div><button class="btn" onclick="coachBullets()">Check my bullets</button></div>
+          <div id="coachResult" style="margin-top:1rem;display:grid;gap:.7rem;"></div>
+        </section>
+      </div>
+
+      <!-- 05 Projects -->
+      <div class="section-panel" id="panel-projects">
+        <section class="card">
+          <div class="panel-header"><div><h3 class="panel-title">Projects</h3><p class="panel-note">Academic, competition, and side projects with outcomes.</p></div><button class="btn" onclick="addProj()">+ Add</button></div>
+          <div id="proj-entries" style="margin-top:1rem;display:grid;gap:1rem;"></div>
+        </section>
+      </div>
+
+      <!-- 06 Skills -->
+      <div class="section-panel" id="panel-skills">
+        <section class="card">
+          <div class="panel-header"><div><h3 class="panel-title">Skills</h3><p class="panel-note">Grouped by category for ATS readability.</p></div><button class="btn" onclick="addSkill()">+ Add</button></div>
+          <div id="skill-entries" style="margin-top:1rem;display:grid;gap:1rem;"></div>
+        </section>
+      </div>
+
+      <!-- 07 Achievements -->
+      <div class="section-panel" id="panel-achievements">
+        <section class="card">
+          <div class="panel-header"><div><h3 class="panel-title">Achievements</h3><p class="panel-note">Awards, recognitions, and leadership roles.</p></div><button class="btn" onclick="addAch()">+ Add</button></div>
+          <div id="ach-entries" style="margin-top:1rem;display:grid;gap:1rem;"></div>
+        </section>
+      </div>
+
+      <!-- 08 Design -->
+      <div class="section-panel" id="panel-design">
+        <section class="card">
+          <div class="panel-header"><div><h3 class="panel-title">Template</h3><p class="panel-note">Six starting points. Preview and PDF export always match.</p></div><button class="btn ghost" onclick="randomiseStyle()">Shuffle</button></div>
+          <div class="preset-grid" id="presetGrid"></div>
+        </section>
+        <section class="card">
+          <div class="panel-header"><div><h3 class="panel-title">Fine tuning</h3><p class="panel-note">Currently: <strong id="presetLabel">Classic</strong>. Change anything below and it becomes a custom combination.</p></div></div>
+          <div class="knob-grid" id="knobGrid"></div>
+          <div class="hint" style="margin-top:var(--sp4);">These are the variations that do not break ATS parsing. Columns, tables, icons, photos and skill bars are deliberately absent — they are the main reason resumes get shredded by parsers.</div>
+        </section>
+        <section class="card">
+          <div class="panel-header"><div><h3 class="panel-title">Accent Colour</h3><p class="panel-note">Applied to headings, dividers, and links in the preview.</p></div></div>
+          <div class="color-grid" id="colorGrid">
+            <div class="color-swatch selected" style="background:#0f6a6e" data-color="#0f6a6e" onclick="selectColor('#0f6a6e',this)"></div>
+            <div class="color-swatch" style="background:#1d4ed8" data-color="#1d4ed8" onclick="selectColor('#1d4ed8',this)"></div>
+            <div class="color-swatch" style="background:#7c3aed" data-color="#7c3aed" onclick="selectColor('#7c3aed',this)"></div>
+            <div class="color-swatch" style="background:#b91c1c" data-color="#b91c1c" onclick="selectColor('#b91c1c',this)"></div>
+            <div class="color-swatch" style="background:#b45309" data-color="#b45309" onclick="selectColor('#b45309',this)"></div>
+            <div class="color-swatch" style="background:#0f766e" data-color="#0f766e" onclick="selectColor('#0f766e',this)"></div>
+            <div class="color-swatch" style="background:#1f2937" data-color="#1f2937" onclick="selectColor('#1f2937',this)"></div>
+            <div class="color-custom"><input type="color" id="customColor" value="#0f6a6e" oninput="selectColor(this.value,null)" title="Custom colour"><span style="font-size:var(--text-xs);color:var(--muted);">Custom</span></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- 09 Diagnostics -->
+
+      <!-- ── JOB MATCH ── -->
+      <div class="section-panel" id="panel-jobmatch">
+        <section class="card">
+          <div class="panel-header"><div><h3 class="panel-title">Match against a job description</h3><p class="panel-note">See what this job asks for that your resume does not yet say — then fix it in the tabs above.</p></div></div>
+          <div class="field"><label>Job description</label>
+            <textarea id="build-jd" rows="9" placeholder="Paste the full job description here…" oninput="scheduleAutosave()"></textarea>
+          </div>
+          <button class="btn primary" style="margin-top:.7rem;" onclick="runBuildJobMatch()">Analyse match</button>
+          <div id="buildJDResult" style="margin-top:var(--sp4);"></div>
+        </section>
+      </div>
+      <div class="section-panel" id="panel-diagnostics">
+        <section class="card" style="background:linear-gradient(135deg,color-mix(in srgb,var(--primary-hi) 80%,var(--surface)),var(--surface));border-color:color-mix(in srgb,var(--primary) 20%,var(--border));">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+            <div><div class="eyebrow">Build Score</div><div style="font:700 2.3rem/1 var(--disp);color:var(--primary);margin:.28rem 0 .18rem;" id="b-diag-score">78%</div><p class="panel-note" id="b-diag-label">🟡 Getting there – a few gaps</p></div>
+            <div style="display:grid;gap:.5rem;min-width:190px;flex:1;max-width:300px;">
+              <div style="display:flex;justify-content:space-between;font-size:var(--text-xs);color:var(--muted);"><span>Contact</span><span id="bsc-contact">100%</span></div><div class="progress"><span id="bpb-contact" style="width: 100%;"></span></div>
+              <div style="display:flex;justify-content:space-between;font-size:var(--text-xs);color:var(--muted);"><span>Summary</span><span id="bsc-summary">100%</span></div><div class="progress"><span id="bpb-summary" style="width: 100%;"></span></div>
+              <div style="display:flex;justify-content:space-between;font-size:var(--text-xs);color:var(--muted);"><span>Experience</span><span id="bsc-exp">60%</span></div><div class="progress"><span id="bpb-exp" style="width: 60%;"></span></div>
+              <div style="display:flex;justify-content:space-between;font-size:var(--text-xs);color:var(--muted);"><span>Skills</span><span id="bsc-skills">60%</span></div><div class="progress"><span id="bpb-skills" style="width: 60%;"></span></div>
+            </div>
+          </div>
+        </section>
+        <section class="card"><div class="panel-header"><div><h3 class="panel-title">ATS &amp; Hygiene Checks</h3></div></div><div id="b-hygiene" style="display:grid;gap:var(--sp3);"><div class="diag-item"><span class="pill pass">PASS</span><p><strong>Contact completeness:</strong> Name, email, and phone all present.</p></div><div class="diag-item"><span class="pill pass">PASS</span><p><strong>LinkedIn URL:</strong> LinkedIn profile included.</p></div><div class="diag-item"><span class="pill pass">PASS</span><p><strong>Summary length:</strong> Summary is substantive.</p></div><div class="diag-item"><span class="pill pass">PASS</span><p><strong>Experience entries:</strong> At least one experience entry present.</p></div><div class="diag-item"><span class="pill pass">PASS</span><p><strong>Bullet verb quality:</strong> All bullets use strong action verbs.</p></div><div class="diag-item"><span class="pill warn">WARN</span><p><strong>Quantified outcomes:</strong> Under 30% of bullets have numbers — add measurable outcomes.</p></div><div class="diag-item"><span class="pill pass">PASS</span><p><strong>ATS safety:</strong> No tables, images, or columns — fully ATS-safe.</p></div></div></section>
+        <section class="card"><button class="btn primary" style="width:100%;justify-content:center;padding:.9rem;" onclick="doPrint()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 1v7M4 5l3 3 3-3M2 10v1.5A1.5 1.5 0 003.5 13h7A1.5 1.5 0 0012 11.5V10"></path></svg> Export as PDF</button><p class="panel-note" style="text-align:center;margin-top:.55rem;">Generates a real PDF with selectable text — no print dialog, no date/URL strip, and ATS parsers can read it. <button class="mini-btn" onclick="printFallback()" style="margin-left:.3rem;">Use browser print instead</button></p></section>
+      </div>
+
+      <!-- ── VERSIONS ── -->
+      <div class="section-panel" id="panel-versions">
+        <section class="card">
+          <div class="panel-header"><div><h3 class="panel-title">Versions &amp; applications</h3><p class="panel-note">One saved version per application. Track where each one stands.</p></div><button class="btn primary" onclick="saveAsVersion()">+ Save current as new version</button></div>
+          <div class="hint">Versions live in this browser only — clearing site data deletes them. Export a PDF of anything you need to keep.</div>
+          <div id="versionList" style="margin-top:1rem;display:grid;gap:.7rem;"></div>
+        </section>
+      </div>
+
+
+    </div>
+  </main>
+
+  <aside class="build-preview">
+    <div class="preview-shell">
+      <div class="preview-toolbar">
+        <div><div class="eyebrow">Live Preview</div><strong>ATS-safe output</strong></div>
+        <div style="display:flex;gap:.45rem;align-items:center;"><span class="pill info" id="previewRole">Role</span><button class="btn" style="min-height:32px;padding:.4rem .8rem;font-size:var(--text-xs);" onclick="doPrint()">PDF</button></div>
+      </div>
+      <article class="resume-paper" id="resumePaper">
+    </article>
+    </div>
+  </aside>
+
+</div>
+</div>
+
+<!-- ════════════════ SCORE MODE ════════════════ -->
+<div id="mode-score" style="display:none;">
+<div class="score-app">
+
+  <div class="score-hero">
+    <div class="eyebrow">Resume Scorer</div>
+    <h2>Sharp, discipline-specific feedback</h2>
+    <p>Paste your existing resume below. Get section-by-section scores out of 10 and concrete action points — tailored to your AEC discipline.</p>
+  </div>
+
+  <div class="eyebrow" style="margin-bottom:.7rem;">Step 1 — Select your discipline</div>
+  <div class="disc-grid" id="discGrid">
+    <div class="disc-card selected" data-disc="arch" onclick="selectDisc(this)">
+      <div class="disc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"></path></svg></div>
+      <div class="disc-name">Architecture</div>
+      <div class="disc-sub">Design, spatial, concept, BIM, presentations, studio</div>
+    </div>
+    <div class="disc-card" data-disc="civil" onclick="selectDisc(this)">
+      <div class="disc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 21h18M6 21V10l6-7 6 7v11M10 21v-5h4v5"></path></svg></div>
+      <div class="disc-name">Civil / Structural</div>
+      <div class="disc-sub">Structural analysis, site, construction, IS/ACI codes</div>
+    </div>
+    <div class="disc-card" data-disc="mep" onclick="selectDisc(this)">
+      <div class="disc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"></path></svg></div>
+      <div class="disc-name">MEP Engineering</div>
+      <div class="disc-sub">HVAC, plumbing, electrical, BMS, ASHRAE, energy</div>
+    </div>
+  </div>
+
+  <div class="eyebrow" style="margin-bottom:.7rem;">Step 2 — Upload or paste your resume</div>
+  <div class="upload-zone" id="scoreDrop">
+    <div class="upload-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4"></path><path d="M3 16v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path></svg></div>
+    <div>
+      <strong>Upload a PDF</strong>
+      <p class="panel-note" style="margin:.15rem 0 0;">or a .txt / .md file. The text is pulled out in your browser — the file is never uploaded anywhere.</p>
+    </div>
+    <label class="btn primary" style="cursor:pointer;white-space:nowrap;">Choose file<input type="file" accept=".pdf,.txt,.md,application/pdf,text/plain" onchange="handleResumeFile(this,'score-paste')" style="display:none;"></label>
+  </div>
+  <div id="scoreFileStatus" class="file-status"></div>
+  <div class="field" style="margin-bottom:var(--sp4);">
+    <label>Or paste it here — name, contact, summary, experience, education, skills, projects. The more complete, the more accurate your score.</label>
+    <textarea id="score-paste" rows="10" placeholder="Paste your full resume text here…"></textarea>
+  </div>
+
+  <div class="eyebrow" style="margin-bottom:.7rem;">Step 3 — Paste a job description (optional)</div>
+  <div class="field" style="margin-bottom:var(--sp4);">
+    <label>Paste the JD you're applying against. We'll pull its key terms and check how many show up in your resume, on top of the discipline scoring above.</label>
+    <textarea id="jd-paste" rows="7" placeholder="Paste the job description here — optional, but sharpens the score…"></textarea>
+  </div>
+
+  <div class="card" style="margin-bottom:var(--sp4);">
+    <div class="panel-header"><div><h3 class="panel-title">AI-powered scoring (optional)</h3><p class="panel-note">Add your own Anthropic API key for deeper, context-aware feedback. Leave blank to use the built-in offline scorer above — it works fully without a key.</p></div></div>
+    <div class="field full"><label>Anthropic API key</label><input type="password" id="ai-key" placeholder="sk-ant-…" oninput="onAIKeyInput()"></div>
+    <label style="display:flex;align-items:center;gap:.4rem;font-size:var(--text-xs);color:var(--muted);margin-top:.6rem;"><input type="checkbox" id="ai-remember" style="width:auto;min-height:unset;" onchange="onAIRememberChange()"> Remember this key in my browser only</label>
+    <p class="panel-note" style="margin-top:.5rem;">Sent directly from your browser to Anthropic — never stored on any server this tool runs.</p>
+  </div>
+
+  <button class="btn primary" id="scoreBtn" style="width:100%;justify-content:center;padding:.95rem;font-size:var(--text-base);" onclick="runScore()">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8" cy="8" r="6"></circle><path d="M8 5v3l2 2"></path></svg>
+    Analyse &amp; Score My Resume
+  </button>
+
+  <!-- RESULTS -->
+  <div class="score-results" id="scoreResults">
+
+    <div class="score-banner" id="scoreBanner">
+      <div class="score-ring">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="var(--offset)" stroke-width="10"></circle>
+          <circle id="ringCircle" cx="50" cy="50" r="42" fill="none" stroke="var(--primary)" stroke-width="10" stroke-dasharray="264" stroke-dashoffset="264" stroke-linecap="round" style="transition:stroke-dashoffset 1s cubic-bezier(.16,1,.3,1)"></circle>
+        </svg>
+        <div style="text-align:center;"><div class="score-ring-num" id="ringNum">0</div><div class="score-ring-sub">/ 100</div></div>
+      </div>
+      <div class="score-meta">
+        <h3 id="score-disc-label">Architecture Resume</h3>
+        <p id="score-summary-text"></p>
+        <div class="score-verdict" id="score-verdict"></div>
+      </div>
+    </div>
+
+    <div class="eyebrow" style="margin-bottom:.7rem;">Section scores — each out of 10</div>
+    <div class="section-scores" id="sectionScores"></div>
+
+    <div class="action-box">
+      <h3>🎯 Priority action points</h3>
+      <div id="actionList"></div>
+    </div>
+
+    <button class="btn ghost" style="width:100%;justify-content:center;" onclick="$(&#39;scoreResults&#39;).style.display=&#39;none&#39;;$(&#39;score-paste&#39;).focus();">
+      ← Edit &amp; re-score
+    </button>
+  </div>
+
+</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const $$ = s => document.querySelectorAll(s);
+const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+// ── Mode switch ─────────────────────────────────────────────
+const MODE_KEY='rb_last_mode';
+function switchMode(m){
+  ['home','build','score'].forEach(k=>{const el=$('mode-'+k);if(el)el.style.display=(m===k?'':'none');});
+  $('tab-build').classList.toggle('active',m==='build');
+  $('tab-score').classList.toggle('active',m==='score');
+  window.scrollTo({top:0,behavior:'instant'in window?'instant':'auto'});
+  try{localStorage.setItem(MODE_KEY,m);}catch(e){}
+}
+function restoreMode(){
+  let m='home';
+  try{m=localStorage.getItem(MODE_KEY)||'home';}catch(e){}
+  switchMode(['home','build','score'].includes(m)?m:'home');
+}
+
+// ── Theme ───────────────────────────────────────────────────
+const THEME_KEY='rb_theme';
+const THEME_ICONS={
+  light:'<path d="M7 2a5 5 0 1 0 0 10A5 5 0 0 0 7 2z" fill="currentColor" opacity=".15"/><path d="M12 7a5 5 0 1 1-5-5c-1.1 2-1.1 8 0 10a5 5 0 0 0 5-5z"/>',
+  dark:'<circle cx="7" cy="7" r="3"/><path d="M7 1v1M7 12v1M1 7h1M12 7h1M2.9 2.9l.7.7M10.4 10.4l.7.7M2.9 11.1l.7-.7M10.4 3.6l.7-.7"/>',
+  brutal:'<rect x="1.5" y="1.5" width="11" height="11" fill="none"/><path d="M1.5 5h11M1.5 9h11M5 1.5v11M9 1.5v11"/>'
+};
+const THEME_ORDER=['light','dark','brutal'];
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  const icon=$('themeIcon');if(icon)icon.innerHTML=THEME_ICONS[t]||THEME_ICONS.light;
+  const btn=icon&&icon.closest('button');
+  if(btn)btn.title='Theme: '+t[0].toUpperCase()+t.slice(1)+' (click to cycle)';
+  try{localStorage.setItem(THEME_KEY,t);}catch(e){}
+  if(typeof applyStyle==='function')applyStyle();
+}
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme')||'light';
+  const next=THEME_ORDER[(THEME_ORDER.indexOf(cur)+1)%THEME_ORDER.length];
+  applyTheme(next);
+}
+function restoreTheme(){
+  let t='light';
+  try{t=localStorage.getItem(THEME_KEY)||'light';}catch(e){}
+  applyTheme(THEME_ORDER.includes(t)?t:'light');
+}
+
+// ── Build nav ───────────────────────────────────────────────
+const SECTION_TITLES={summary:'Professional Summary',skills:'Skills',experience:'Experience',projects:'Projects',achievements:'Achievements',education:'Education'};
+const BSECS=['import','basic','summary','skills','experience','projects','achievements','education','design','jobmatch','diagnostics','versions'];
+
+// ── Template & colour ──────────────────────────────────────
+/* ═══════════ RESUME STYLE ENGINE ═══════════
+   One object, read by the live preview (via CSS vars + data attributes)
+   and by the PDF renderer. A preset is data, not a second implementation. */
+const STYLE_FIELDS={
+  fonts:      {label:'Typeface',    opts:[['sans','Sans throughout'],['serif','Serif throughout'],['serifHead','Serif headings, sans body']]},
+  nameAlign:  {label:'Name block',  opts:[['left','Left aligned'],['center','Centred'],['split','Name left, contact right'],['banner','Tinted banner']]},
+  heading:    {label:'Headings',    opts:[['ruleUnder','Rule below'],['ruleAbove','Rule above'],['bar','Colour bar'],['block','Filled block'],['plain','Letterspaced only']]},
+  rule:       {label:'Rule weight', opts:[['hair','Hairline'],['medium','Medium'],['thick','Heavy'],['none','No rules']]},
+  density:    {label:'Density',     opts:[['compact','Compact — fits more'],['normal','Normal'],['airy','Airy — reads calmer']]},
+  bullet:     {label:'Bullet',      opts:[['dot','• Dot'],['dash','– Dash'],['square','▪ Square'],['none','No glyph']]},
+  dateAlign:  {label:'Dates',       opts:[['inline','Under the role'],['right','Flush right']]},
+  accentScope:{label:'Accent used for',opts:[['none','Nothing — all black'],['name','Name only'],['headings','Headings and rules'],['full','Name, headings and rules']]}
+};
+const STYLE_PRESETS={
+  classic:  {label:'Classic',  desc:'Ruled headings, left name. The safe default.',
+             s:{fonts:'sans',nameAlign:'left',heading:'ruleUnder',rule:'medium',density:'normal',bullet:'dot',dateAlign:'inline',accentScope:'headings'}},
+  modern:   {label:'Modern',   desc:'Tinted banner, filled heading blocks.',
+             s:{fonts:'sans',nameAlign:'banner',heading:'block',rule:'none',density:'normal',bullet:'dot',dateAlign:'inline',accentScope:'full'}},
+  minimal:  {label:'Minimal',  desc:'No colour, no rules, generous spacing.',
+             s:{fonts:'sans',nameAlign:'left',heading:'plain',rule:'hair',density:'airy',bullet:'dash',dateAlign:'inline',accentScope:'none'}},
+  editorial:{label:'Editorial',desc:'Serif headings, contact right, dates flush right.',
+             s:{fonts:'serifHead',nameAlign:'split',heading:'ruleAbove',rule:'hair',density:'normal',bullet:'dot',dateAlign:'right',accentScope:'name'}},
+  compact:  {label:'Compact',  desc:'Colour bars, tight spacing. For long careers.',
+             s:{fonts:'sans',nameAlign:'left',heading:'bar',rule:'none',density:'compact',bullet:'square',dateAlign:'right',accentScope:'headings'}},
+  formal:   {label:'Formal',   desc:'All serif, centred name. Conservative practices.',
+             s:{fonts:'serif',nameAlign:'center',heading:'ruleUnder',rule:'medium',density:'normal',bullet:'dot',dateAlign:'inline',accentScope:'none'}}
+};
+const DENSITY={
+  compact:{padY:'1.35rem',padX:'1.6rem',fs:'.78rem',lead:'1.38',secgap:'.68rem',name:'1.48rem',role:'.8rem',meta:'.73rem',kv:'.8rem',dloc:'.72rem',h3:'.66rem',headGap:'.8rem',headPad:'.6rem'},
+  normal: {padY:'1.8rem', padX:'2rem',  fs:'.84rem',lead:'1.5', secgap:'1rem',  name:'1.7rem', role:'.86rem',meta:'.78rem',kv:'.86rem',dloc:'.77rem',h3:'.7rem', headGap:'1.1rem',headPad:'.85rem'},
+  airy:   {padY:'2.1rem', padX:'2.3rem',fs:'.87rem',lead:'1.62',secgap:'1.35rem',name:'1.8rem',role:'.88rem',meta:'.8rem', kv:'.89rem',dloc:'.79rem',h3:'.72rem',headGap:'1.35rem',headPad:'1rem'}
+};
+const FONT_STACKS={
+  sans:     {head:"'Satoshi',system-ui,sans-serif",body:"'Satoshi',system-ui,sans-serif"},
+  serif:    {head:"Georgia,'Times New Roman',serif",body:"Georgia,'Times New Roman',serif"},
+  serifHead:{head:"Georgia,'Times New Roman',serif",body:"'Satoshi',system-ui,sans-serif"}
+};
+const RULE_W={hair:'1px',medium:'1.6px',thick:'2.6px',none:'0px'};
+const BULLET_CH={dot:'•',dash:'–',square:'▪',none:''};
+let resumeStyle=Object.assign({preset:'classic'},STYLE_PRESETS.classic.s);
+
+function hexToRgb(x){const m=(x||'#0f6a6e').replace('#','');return [parseInt(m.slice(0,2),16)||0,parseInt(m.slice(2,4),16)||0,parseInt(m.slice(4,6),16)||0];}
+function mixWhite(rgb,pct){return rgb.map(c=>Math.round(c+(255-c)*pct));}
+function rgbCss(r){return 'rgb('+r[0]+','+r[1]+','+r[2]+')';}
+function currentAccent(){
+  return (getComputedStyle(document.documentElement).getPropertyValue('--resume-accent')||'#0f6a6e').trim();
+}
+/* Resolves where the accent is allowed to appear. Both renderers use this. */
+function styleColors(accentHex,scope){
+  const ac=hexToRgb(accentHex);
+  return {
+    accent:ac,
+    name:  (scope==='name'||scope==='full')?ac:[26,26,26],
+    head:  (scope==='headings'||scope==='full')?ac:[51,51,51],
+    rule:  (scope==='headings'||scope==='full')?ac:[205,205,205],
+    hrule: (scope==='none')?[190,190,190]:ac,
+    banner:(scope==='none')?[244,244,244]:mixWhite(ac,0.9),
+    bullet:(scope==='full')?ac:[85,85,85]
+  };
+}
+function applyStyle(){
+  const p=$('resumePaper');if(!p)return;
+  const st=resumeStyle, D=DENSITY[st.density]||DENSITY.normal, F=FONT_STACKS[st.fonts]||FONT_STACKS.sans;
+  const C=styleColors(currentAccent(),st.accentScope);
+  const set=(k,v)=>p.style.setProperty(k,v);
+  set('--r-body-font',F.body); set('--r-head-font',F.head);
+  set('--r-pad-y',D.padY); set('--r-pad-x',D.padX);
+  set('--r-fs',D.fs); set('--r-lead',D.lead); set('--r-secgap',D.secgap);
+  set('--r-name-size',D.name); set('--r-role-size',D.role); set('--r-meta-size',D.meta);
+  set('--r-kv-size',D.kv); set('--r-dloc-size',D.dloc); set('--r-h3-size',D.h3);
+  set('--r-head-gap',D.headGap); set('--r-head-pad',D.headPad);
+  set('--r-rule-w',RULE_W[st.rule]||'1.6px');
+  set('--r-rule-c',rgbCss(C.rule)); set('--r-head-c',rgbCss(C.head));
+  set('--r-name-c',rgbCss(C.name)); set('--r-hrule-c',rgbCss(C.hrule));
+  set('--r-hrule-w',st.nameAlign==='banner'?'0px':(RULE_W[st.rule]==='0px'?'1px':RULE_W[st.rule]));
+  set('--r-banner-c',rgbCss(C.banner)); set('--r-bullet-c',rgbCss(C.bullet));
+  set('--r-bullet',"'"+(BULLET_CH[st.bullet]||'•')+"'");
+  p.dataset.heading=st.heading; p.dataset.name=st.nameAlign;
+  p.dataset.date=st.dateAlign; p.dataset.bullet=st.bullet;
+  $$('#presetGrid .preset-card').forEach(c=>c.classList.toggle('selected',c.dataset.preset===st.preset));
+  Object.keys(STYLE_FIELDS).forEach(k=>{const el=$('sty-'+k);if(el&&el.value!==st[k])el.value=st[k];});
+  const lbl=$('presetLabel');
+  if(lbl)lbl.textContent=st.preset==='custom'?'Custom':(STYLE_PRESETS[st.preset]?STYLE_PRESETS[st.preset].label:'Custom');
+}
+function matchPreset(){
+  for(const id in STYLE_PRESETS){
+    if(Object.keys(STYLE_PRESETS[id].s).every(k=>STYLE_PRESETS[id].s[k]===resumeStyle[k]))return id;
+  }
+  return 'custom';
+}
+function selectPreset(id){
+  if(!STYLE_PRESETS[id])return;
+  resumeStyle=Object.assign({preset:id},STYLE_PRESETS[id].s);
+  applyStyle();syncPreview();
+  if(typeof scheduleAutosave==='function')scheduleAutosave();
+}
+function setStyleField(k,v){
+  resumeStyle[k]=v; resumeStyle.preset=matchPreset();
+  applyStyle();syncPreview();
+  if(typeof scheduleAutosave==='function')scheduleAutosave();
+}
+function randomiseStyle(){
+  Object.keys(STYLE_FIELDS).forEach(k=>{
+    const o=STYLE_FIELDS[k].opts; resumeStyle[k]=o[Math.floor(Math.random()*o.length)][0];
+  });
+  resumeStyle.preset=matchPreset();applyStyle();syncPreview();
+  if(typeof scheduleAutosave==='function')scheduleAutosave();
+  toast('Shuffled — '+(resumeStyle.preset==='custom'?'a one-off combination':STYLE_PRESETS[resumeStyle.preset].label));
+}
+/* older drafts stored template:'tpl-modern' etc. */
+function styleFromDraft(d){
+  if(d&&d.style&&d.style.heading)return Object.assign({preset:'custom'},d.style,{preset:d.style.preset||'custom'});
+  const legacy=(d&&d.template||'tpl-classic').replace('tpl-','');
+  const p=STYLE_PRESETS[legacy]?legacy:'classic';
+  return Object.assign({preset:p},STYLE_PRESETS[p].s);
+}
+function buildStyleUI(){
+  const g=$('presetGrid');
+  if(g)g.innerHTML=Object.keys(STYLE_PRESETS).map(id=>{
+    const p=STYLE_PRESETS[id],s=p.s;
+    const headBar=s.heading==='block'?'<i class="h" style="background:var(--resume-accent);height:4px;"></i>'
+      :s.heading==='bar'?'<i class="h" style="background:var(--resume-accent)"></i>'
+      :'<i class="h" style="background:'+(s.accentScope==='none'?'#777':'var(--resume-accent)')+'"></i>';
+    const nameBar='<i class="n"'+(s.nameAlign==='center'||s.nameAlign==='banner'?' style="margin:0 auto"':'')+'></i>';
+    return '<div class="preset-card'+(id===resumeStyle.preset?' selected':'')+'" data-preset="'+id+'" onclick="selectPreset(\''+id+'\')">'
+      +'<div class="mini-paper"'+(s.nameAlign==='banner'?' style="background:color-mix(in srgb,var(--resume-accent) 10%,#fff)"':'')+'>'
+      +nameBar+headBar+'<i></i><i></i><i style="width:70%"></i></div>'
+      +'<div class="preset-name">'+p.label+'</div><div class="preset-desc">'+p.desc+'</div></div>';
+  }).join('');
+  const k=$('knobGrid');
+  if(k)k.innerHTML=Object.keys(STYLE_FIELDS).map(f=>{
+    const F=STYLE_FIELDS[f];
+    return '<div class="knob"><label for="sty-'+f+'">'+F.label+'</label><select id="sty-'+f+'" onchange="setStyleField(\''+f+'\',this.value)">'
+      +F.opts.map(o=>'<option value="'+o[0]+'">'+o[1]+'</option>').join('')+'</select></div>';
+  }).join('');
+}
+function selectTemplate(t){selectPreset(t);}
+function selectColor(hex,el){
+  document.documentElement.style.setProperty('--resume-accent',hex);
+  if(typeof applyStyle==='function')applyStyle();
+  $$('#colorGrid .color-swatch').forEach(c=>c.classList.remove('selected'));
+  if(el)el.classList.add('selected');
+  $('customColor').value=hex;
+  if(typeof scheduleAutosave==='function')scheduleAutosave();
+}
+// ── Section switching (sidebar + mobile chips stay in sync) ──
+function selectSection(s){
+  if(!BSECS.includes(s))return;
+  $$('#secNav button[data-s]').forEach(b=>b.classList.toggle('active',b.dataset.s===s));
+  $$('#mobSecNav button[data-s]').forEach(b=>{
+    const on=b.dataset.s===s;
+    b.classList.toggle('active',on);
+    if(on&&b.scrollIntoView)b.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+  });
+  BSECS.forEach(id=>{const p=$('panel-'+id);if(p)p.classList.toggle('active',id===s);});
+}
+['secNav','mobSecNav'].forEach(navId=>{
+  const nav=$(navId);if(!nav)return;
+  nav.addEventListener('click',e=>{
+    const btn=e.target.closest('button[data-s]');if(!btn)return;
+    selectSection(btn.dataset.s);
+    if(navId==='mobSecNav')setMobView('edit');
+  });
+});
+
+// ── Mobile edit/preview toggle ──────────────────────────────
+function setMobView(v){
+  document.body.classList.toggle('mob-preview',v==='preview');
+  $('mobViewEdit').classList.toggle('active',v!=='preview');
+  $('mobViewPreview').classList.toggle('active',v==='preview');
+  if(v==='preview')syncPreview();
+}
+
+// ── Live preview ────────────────────────────────────────────
+function bHtml(raw){
+  if(!raw.trim())return'';
+  return raw.split('\n').filter(l=>l.trim()).map(l=>`<li>${esc(l.replace(/^[•\-]\s*/,''))}</li>`).join('');
+}
+function syncPreview(){
+  const name=$('f-name').value,role=$('f-role').value,phone=$('f-phone').value,
+        email=$('f-email').value,linkedin=$('f-linkedin').value,loc=$('f-location').value,sum=$('f-summary').value;
+  $('previewRole').textContent=role.split('·')[0].trim()||'Role';
+  let edu='';$$('#edu-entries .entry').forEach(e=>{
+    const d=e.querySelector('.edu-degree')?.value||'',i=e.querySelector('.edu-inst')?.value||'',
+          y=e.querySelector('.edu-year')?.value||'',g=e.querySelector('.edu-grade')?.value||'',c=e.querySelector('.edu-course')?.value||'';
+    if(!d&&!i)return;
+    edu+=`<div class="resume-kv"><div class="kv-top"><strong>${esc(d)}</strong>${y?`<span class="kv-date">${esc(y)}</span>`:''}</div><p class="dloc">${esc(i)}${y?`<span class="d-sep"> · </span><span class="d-dates">${esc(y)}</span>`:''}${g?' · '+esc(g):''}</p>${c?`<p>${esc(c)}</p>`:''}</div>`;
+  });
+  let exp='';$$('#exp-entries .entry').forEach(e=>{
+    const r=e.querySelector('.exp-role')?.value||'',co=e.querySelector('.exp-company')?.value||'',
+          dt=e.querySelector('.exp-dates')?.value||'',lc=e.querySelector('.exp-loc')?.value||'',bl=e.querySelector('.exp-bullets')?.value||'';
+    if(!r&&!co)return;const b=bHtml(bl);
+    exp+=`<div class="resume-kv"><div class="kv-top"><strong>${esc(r)}${co?' · '+esc(co):''}</strong>${dt?`<span class="kv-date">${esc(dt)}</span>`:''}</div><p class="dloc">${dt?`<span class="d-dates">${esc(dt)}</span>`:''}${dt&&lc?'<span class="d-sep"> · </span>':''}${lc?esc(lc):''}</p>${b?`<ul>${b}</ul>`:''}</div>`;
+  });
+  let proj='';$$('#proj-entries .entry').forEach(e=>{
+    const t=e.querySelector('.proj-title')?.value||'',d=e.querySelector('.proj-desc')?.value||'';
+    if(!t)return;proj+=`<li><strong>${esc(t)}:</strong> ${esc(d)}</li>`;
+  });
+  let skill='';$$('#skill-entries .entry').forEach(e=>{
+    const c=e.querySelector('.skill-cat')?.value||'',i=e.querySelector('.skill-items')?.value||'';
+    if(!c)return;skill+=`<div class="resume-kv"><strong>${esc(c)}</strong><p>${esc(i)}</p></div>`;
+  });
+  let ach='';$$('#ach-entries .entry').forEach(e=>{
+    const r=e.querySelector('.ach-role')?.value||'',p=e.querySelector('.ach-period')?.value||'',d=e.querySelector('.ach-desc')?.value||'';
+    if(!r)return;
+    ach+=`<div class="resume-kv"><div class="kv-top"><strong>${esc(r)}</strong>${p?`<span class="kv-date">${esc(p)}</span>`:''}</div>${p?`<p class="dloc"><span class="d-dates">${esc(p)}</span></p>`:''}${d?`<p>${esc(d)}</p>`:''}</div>`;
+  });
+  $('resumePaper').innerHTML=`
+    <header class="resume-header">
+      <div><h1 class="resume-name">${esc(name.toUpperCase())}</h1><p class="resume-role">${esc(role)}</p></div>
+      <div class="resume-meta">${phone?`<div>${esc(phone)}</div>`:''}${email?`<div><a href="mailto:${esc(email)}">${esc(email)}</a></div>`:''}${linkedin?`<div><a href="https://${esc(linkedin.replace(/^https?:\/\//,''))}">${esc(linkedin)}</a></div>`:''}${loc?`<div>${esc(loc)}</div>`:''}</div>
+    </header>
+    ${sum?`<section class="resume-section"><h3>${SECTION_TITLES.summary}</h3><p>${esc(sum)}</p></section>`:''}
+    ${skill?`<section class="resume-section"><h3>${SECTION_TITLES.skills}</h3><div class="resume-list">${skill}</div></section>`:''}
+    ${exp?`<section class="resume-section"><h3>${SECTION_TITLES.experience}</h3><div class="resume-list">${exp}</div></section>`:''}
+    ${proj?`<section class="resume-section"><h3>${SECTION_TITLES.projects}</h3><ul>${proj}</ul></section>`:''}
+    ${ach?`<section class="resume-section"><h3>${SECTION_TITLES.achievements}</h3><div class="resume-list">${ach}</div></section>`:''}
+    ${edu?`<section class="resume-section"><h3>${SECTION_TITLES.education}</h3><div class="resume-list">${edu}</div></section>`:''}`;
+  updateBuildDiag();
+  if(typeof scheduleAutosave==='function')scheduleAutosave();
+}
+
+// ── Build diagnostics ───────────────────────────────────────
+const METRIC_RE=/\d+\s*(%|x|hrs?|hours?|days?|months?|projects?|teams?|members?|clients?|\$|₹|lakh|crore|k\b)/i;
+const WEAK_VERBS=['responsible','worked','helped','assisted','involved','participated'];
+function updateBuildDiag(){
+  const name=$('f-name').value.trim(),phone=$('f-phone').value.trim(),email=$('f-email').value.trim(),
+        linkedin=$('f-linkedin').value.trim(),sumVal=$('f-summary').value.trim();
+  let contact=0;if(name)contact+=25;if(phone)contact+=25;if(email)contact+=25;if(linkedin)contact+=25;
+  const sumPct=sumVal.length>200?100:sumVal.length>80?60:sumVal.length>20?30:0;
+  let expBullets=0,metricB=0,weakB=0;
+  $$('#exp-entries .entry').forEach(e=>{
+    (e.querySelector('.exp-bullets')?.value||'').split('\n').filter(l=>l.trim()).forEach(l=>{
+      expBullets++;if(METRIC_RE.test(l))metricB++;
+      const cl=l.replace(/^[•\-]\s*/,'').toLowerCase();if(WEAK_VERBS.some(w=>cl.startsWith(w)))weakB++;
+    });
+  });
+  const expPct=expBullets===0?0:Math.round(((expBullets-weakB)/expBullets*60)+(metricB/expBullets*40));
+  const skillPct=Math.min($$('#skill-entries .entry').length*30,100);
+  const overall=Math.round(contact*.25+sumPct*.20+expPct*.35+skillPct*.20);
+  $('b-diag-score').textContent=overall+'%';$('b-stat-score').textContent=overall+'%';
+  $('b-diag-label').textContent=overall>=80?'🟢 Strong profile – ready to send':overall>=55?'🟡 Getting there – a few gaps':'🔴 Needs work before sending';
+  const setBar=(pb,sc,v)=>{$(pb).style.width=v+'%';$(sc).textContent=v+'%';};
+  setBar('bpb-contact','bsc-contact',contact);setBar('bpb-summary','bsc-summary',sumPct);setBar('bpb-exp','bsc-exp',expPct);setBar('bpb-skills','bsc-skills',skillPct);
+  const filled=[name,sumVal,$$('#edu-entries .entry').length,$$('#exp-entries .entry').length,$$('#proj-entries .entry').length,$$('#skill-entries .entry').length,$$('#ach-entries .entry').length].filter(Boolean).length;
+  $('b-stat-secs').textContent=filled+'/7';
+  const checks=[
+    {pass:name&&email&&phone,t:'Contact completeness',pm:'Name, email, and phone all present.',fm:'Missing name, email, or phone — fill Basic Info.'},
+    {pass:linkedin.length>0,t:'LinkedIn URL',pm:'LinkedIn profile included.',fm:'No LinkedIn URL — add one.'},
+    {pass:sumVal.length>100,t:'Summary length',pm:'Summary is substantive.',fm:'Summary too short — aim for 80+ words.'},
+    {pass:$$('#exp-entries .entry').length>=1,t:'Experience entries',pm:'At least one experience entry present.',fm:'No experience added.'},
+    {pass:weakB===0||expBullets===0,t:'Bullet verb quality',pm:'All bullets use strong action verbs.',fm:`${weakB} bullet(s) use weak openers like "responsible for".`},
+    {pass:expBullets===0||metricB/expBullets>=.3,t:'Quantified outcomes',pm:'Good metric coverage in experience bullets.',fm:'Under 30% of bullets have numbers — add measurable outcomes.'},
+    {pass:true,t:'ATS safety',pm:'No tables, images, or columns — fully ATS-safe.',fm:''},
+  ];
+  $('b-hygiene').innerHTML=checks.map(c=>`<div class="diag-item"><span class="pill ${c.pass?'pass':'warn'}">${c.pass?'PASS':'WARN'}</span><p><strong>${c.t}:</strong> ${c.pass?c.pm:c.fm}</p></div>`).join('');
+}
+
+// ── Build entries ────────────────────────────────────────────
+function mkEntry(fields,cid){const c=$(cid),idx=c.querySelectorAll('.entry').length+1;const d=document.createElement('div');d.className='entry';d.innerHTML=`<div class="entry-head"><div class="entry-title">Entry ${idx}</div><div><button class="mini-btn" onclick="rmEntry(this,'${cid}')">Remove</button></div></div><div class="field-grid">${fields}</div>`;c.appendChild(d);syncPreview();}
+function rmEntry(btn,cid){btn.closest('.entry').remove();syncPreview();}
+function addEdu(){mkEntry(`<div class="field"><label>Degree</label><input class="edu-degree" value="" oninput="syncPreview()"/></div><div class="field"><label>Institute</label><input class="edu-inst" value="" oninput="syncPreview()"/></div><div class="field"><label>Year</label><input class="edu-year" value="" oninput="syncPreview()"/></div><div class="field"><label>Grade</label><input class="edu-grade" value="" oninput="syncPreview()"/></div><div class="field full"><label>Specialisation</label><input class="edu-course" value="" oninput="syncPreview()"/></div>`,'edu-entries');}
+function addExp(){mkEntry(`<div class="field"><label>Role</label><input class="exp-role" value="" oninput="syncPreview()"/></div><div class="field"><label>Company</label><input class="exp-company" value="" oninput="syncPreview()"/></div><div class="field"><label>Dates</label><input class="exp-dates" value="" oninput="syncPreview()"/></div><div class="field"><label>Location</label><input class="exp-loc" value="" oninput="syncPreview()"/></div><div class="field full"><label>Bullets (• per line)</label><textarea class="exp-bullets" rows="4" oninput="syncPreview()"></textarea></div>`,'exp-entries');}
+function addProj(){mkEntry(`<div class="field full"><label>Title</label><input class="proj-title" value="" oninput="syncPreview()"/></div><div class="field full"><label>Description</label><input class="proj-desc" value="" oninput="syncPreview()"/></div>`,'proj-entries');}
+function addSkill(){mkEntry(`<div class="field"><label>Category</label><input class="skill-cat" value="" oninput="syncPreview()"/></div><div class="field"><label>Items</label><input class="skill-items" value="" oninput="syncPreview()"/></div>`,'skill-entries');}
+function addAch(){mkEntry(`<div class="field"><label>Role / Award</label><input class="ach-role" value="" oninput="syncPreview()"/></div><div class="field"><label>Period</label><input class="ach-period" value="" oninput="syncPreview()"/></div><div class="field full"><label>Description</label><textarea class="ach-desc" rows="3" oninput="syncPreview()"></textarea></div>`,'ach-entries');}
+
+// ══════════════════════════════════════════════════
+// SCORE MODE
+// ══════════════════════════════════════════════════
+let currentDisc='arch';
+function selectDisc(card){$$('#discGrid .disc-card').forEach(c=>c.classList.remove('selected'));card.classList.add('selected');currentDisc=card.dataset.disc;}
+
+const DISC={
+  arch:{
+    label:'Architecture',
+    kw:{
+      summary:['design','architect','spatial','concept','studio','bim','revit','autocad','rhino','sketchup','presentation','client','render','portfolio','creative','drawings'],
+      experience:['designed','coordinated','presented','produced','led','created','collaborated','conceptualised','detailed','managed','delivered','visualised','schematic','developed'],
+      skills:['revit','autocad','rhino','sketchup','lumion','enscape','3ds max','photoshop','illustrator','indesign','archicad','bim','space planning','client presentation','design development'],
+      education:['b.arch','m.arch','architecture','design','urban','planning','coa'],
+      projects:['residential','commercial','institutional','mixed-use','urban','master plan','renovation','adaptive reuse','competition','conceptual'],
+      achievements:['award','competition','nasa','finalist','published','exhibition','scholarship','rank'],
+    },
+    fb:{
+      contact:{lo:'Add name, phone, email, LinkedIn, and a portfolio URL. Architecture candidates must have a portfolio link.',mi:'Contact mostly present. Add a portfolio link if missing.',hi:'Contact section is complete.'},
+      summary:{lo:'Summary is missing or too vague. Mention: design typology (residential/commercial/institutional), top 2–3 tools (Revit, Rhino, SketchUp), and one project outcome.',mi:'Good start but needs specificity. Name your typology focus, top tools, and a concrete achievement (project scale, client outcome).',hi:'Strong summary that clearly positions your design background and capabilities.'},
+      experience:{lo:'Bullets need action verbs: Designed, Developed, Produced, Coordinated, Conceptualised. Add at least one metric — sqft, number of schemes, client satisfaction, or timeline.',mi:'Experience is solid. Sharpen bullets by adding scale: sqft area, number of schemes produced, project value, or client deliverable.',hi:'Experience section is strong with clear, action-led bullets and measurable outcomes.'},
+      skills:{lo:'Skills list is too thin. Add: Revit, AutoCAD, Rhino, SketchUp, Lumion or Enscape, Photoshop, Illustrator, InDesign. Group by BIM / Visualisation / Adobe Suite.',mi:'Core tools present. Consider grouping: BIM Tools / Visualisation / Adobe Suite / Design Methods for better ATS parsing.',hi:'Skills section is well-structured with the right tools for architecture placements.'},
+      education:{lo:'Education is missing or incomplete. Add: degree, institute, year, and any design specialisations or thesis topic relevant to your target role.',mi:'Education is present. Add relevant coursework or your thesis topic if it aligns with your target role.',hi:'Education section is clear and relevant.'},
+      projects:{lo:'No projects listed. Architecture resumes need design projects. Add academic, competition, or freelance work — include typology, scale (sqft or floors), and your specific contribution.',mi:'Projects listed but lack context. Add: typology, area/scale, your specific role, and what outcome it produced.',hi:'Projects section is strong — clear scope, typology, and your design contribution are evident.'},
+      achievements:{lo:'Add achievements: design competitions (NASA, ARCASIA), awards, exhibition participation, academic merit, or published/featured work.',mi:'Some achievements present. Prioritise design competitions and peer-recognised work over generic extracurriculars.',hi:'Achievements add strong credibility to your architecture profile.'},
+    },
+    actions:{
+      contact:'Add all contact details: name, phone, email, LinkedIn, and a portfolio URL.',
+      summary:'Rewrite summary: name your design typology, top 2–3 tools (Revit, Rhino, SketchUp), and one project outcome or client achievement.',
+      experience:'Add action verbs to every bullet (Designed, Produced, Coordinated). Add at least one number per role: sqft, project value, number of schemes, or timeline.',
+      skills:'Expand skills: Revit, AutoCAD, Rhino, SketchUp, Lumion/Enscape, Photoshop, Illustrator, InDesign. Group into categories.',
+      education:'Complete education: degree, institute, year, CGPA (if ≥7.5), and thesis or specialisation topic.',
+      projects:'Add design projects with typology, scale (sqft/floors), your specific role, and what was produced or achieved.',
+      achievements:'Add: NASA or design competition results, academic merit, exhibitions, or published/featured work.',
+    }
+  },
+  civil:{
+    label:'Civil / Structural Engineering',
+    kw:{
+      summary:['civil','structural','engineer','construction','rcc','steel','foundation','analysis','site','etabs','staad','autocad','revit','is codes','aci','design'],
+      experience:['designed','analysed','coordinated','supervised','inspected','prepared','reviewed','managed','executed','delivered','calculated','modelled','estimated','supervised'],
+      skills:['etabs','staad pro','autocad','revit','safe','sap2000','ms project','primavera','rcc','steel design','is codes','aci','eurocode','bim','bim 360','soil mechanics','quantity surveying'],
+      education:['b.tech','b.e','m.tech','civil engineering','structural','geotechnical','transportation','iit','nit'],
+      projects:['bridge','building','foundation','rcc','steel','high rise','infrastructure','road','retaining wall','pile','structural analysis'],
+      achievements:['gate','rank','scholarship','published','award','certification','cost saving'],
+    },
+    fb:{
+      contact:{lo:'Add name, phone, email, LinkedIn. Civil engineers with GATE scores or certifications should note them near their name.',mi:'Contact mostly present. Add LinkedIn and any prominent certifications.',hi:'Contact section is complete.'},
+      summary:{lo:'Summary is missing or generic. Mention: engineering focus (structural/geotechnical/construction), key tools (ETABS, STAAD Pro), codes you use (IS, ACI), and a project outcome (value, spans, floors).',mi:'Summary present but vague. Specify structural/civil focus, codes you work with, and a tangible project outcome (cost, spans, system type).',hi:'Strong summary that clearly positions your civil/structural background and technical expertise.'},
+      experience:{lo:'Bullets need action verbs: Designed, Analysed, Supervised, Prepared, Estimated. Add metrics: project value (₹ crore), spans (m), floor count, site area, or timeline savings.',mi:'Experience is present. Strengthen bullets with numbers: project cost, structural system type, floors, span lengths, or quantities of steel/concrete.',hi:'Experience section is strong with technical specificity and clear measurable outcomes.'},
+      skills:{lo:'Skills list is too thin. Add: ETABS, STAAD Pro, AutoCAD, Revit/BIM 360, SAP2000, IS Codes, SAFE, MS Project or Primavera.',mi:'Core tools present. Organise into: Analysis & Design / BIM & Drafting / Project Management / Codes & Standards.',hi:'Skills are well-structured and clearly communicate your technical depth.'},
+      education:{lo:'Education missing or incomplete. Add: degree, institute, year, CGPA, and relevant subjects like Structural Analysis, Foundation Engineering, or FEM.',mi:'Education present. Add CGPA if ≥7.5 and list 2–3 relevant technical subjects or your thesis topic.',hi:'Education section is clear and relevant to civil/structural engineering.'},
+      projects:{lo:'No projects listed. Structural engineers need project entries showing: system type (RCC/Steel), span or height, codes used, and your design contribution.',mi:'Projects listed but lack depth. Add: structural system, loads considered, software used, and whether you designed or supervised.',hi:'Projects section effectively demonstrates your technical depth and project exposure.'},
+      achievements:{lo:'Add: GATE rank and score, academic rank, publications, structural/BIM certifications, or notable project recognitions.',mi:'Some achievements present. Quantify where possible: GATE rank, cost saved, project size delivered.',hi:'Achievements strengthen your profile with clear recognition and technical merit.'},
+    },
+    actions:{
+      contact:'Add all contact details: name, phone, email, LinkedIn. GATE rank (if top 500) can be mentioned near your name.',
+      summary:'Rewrite: specify structural focus (RCC/Steel), tools (ETABS, STAAD Pro), codes (IS/ACI), and one project outcome (value, spans, floors).',
+      experience:'Add action verbs (Designed, Analysed, Supervised). Add numbers: project value (₹ crore), structural spans (m), floor count, or cost savings.',
+      skills:'Add: ETABS, STAAD Pro, AutoCAD, Revit/BIM 360, SAFE, SAP2000, IS Codes, Primavera or MS Project. Group by discipline.',
+      education:'Complete education: degree, institute, year, CGPA (≥7.5), and relevant technical subjects or thesis.',
+      projects:'List structural projects: system type (RCC/Steel), span or height, codes followed, software used, and your specific design or supervision scope.',
+      achievements:'Add: GATE rank/score, academic rank, certifications (CADD, BIM), publications, or project completions with outcomes.',
+    }
+  },
+  mep:{
+    label:'MEP Engineering',
+    kw:{
+      summary:['mep','mechanical','electrical','plumbing','hvac','fire','engineer','bim','revit mep','autocad mep','energy','ashrae','nbc','bms','chiller','vrf'],
+      experience:['designed','coordinated','modelled','reviewed','commissioned','installed','calculated','managed','prepared','analysed','supervised','delivered','optimised'],
+      skills:['revit mep','autocad mep','carrier hap','dialux','etap','hvac','ductwork','chiller','vrf','fan coil','fire fighting','plumbing','bms','lv','ht','earthing','ashrae','nbc','is codes','bim'],
+      education:['b.tech','b.e','m.tech','mechanical','electrical','mep','hvac','building services','iit','nit'],
+      projects:['hvac','mep','fire fighting','plumbing','electrical','bms','hospital','data centre','commercial','pharmaceutical','residential'],
+      achievements:['leed','energy audit','cost saving','rank','scholarship','commissioning','certification'],
+    },
+    fb:{
+      contact:{lo:'Add name, phone, email, LinkedIn. MEP engineers with LEED AP or other certifications should note them near their name.',mi:'Contact mostly present. Add LinkedIn and any professional certifications.',hi:'Contact section is complete.'},
+      summary:{lo:'Summary is missing or generic. Mention: MEP discipline (HVAC/Electrical/Plumbing/Fire), tools (Revit MEP, HAP, DIALux), codes (ASHRAE, NBC, IS), and a system-level outcome (tonnage, floors, project type).',mi:'Good summary but needs specificity. Name the MEP systems you design, key codes, and one quantifiable outcome (capacity, floors, area, energy savings).',hi:'Strong summary that clearly positions your MEP specialisation and technical expertise.'},
+      experience:{lo:'Bullets need action verbs: Designed, Coordinated, Modelled, Commissioned, Calculated. Add metrics: system capacity (TR/kW), floors, area (sqft), building type, or energy savings (%).',mi:'Experience present but can be stronger. Add: system capacity, building type, exact scope (design/coordination/commissioning), and one measurable outcome.',hi:'Experience section effectively demonstrates MEP system design and coordination depth.'},
+      skills:{lo:'Skills list is thin for MEP. Add: Revit MEP, AutoCAD MEP, Carrier HAP, DIALux, ETAP, BIM 360, ASHRAE 90.1, NBC, IS codes. Include system terms: VRF, Chiller, Ductwork, LV/HV.',mi:'Core tools listed. Organise by discipline: HVAC / Electrical / Plumbing & Fire / BIM & Coordination / Codes & Standards.',hi:'Skills section is well-organised and shows clear MEP system expertise.'},
+      education:{lo:'Education missing or incomplete. Add degree, institute, year, CGPA, and relevant subjects like Refrigeration, Power Systems, or Fluid Mechanics.',mi:'Education present. Add CGPA if ≥7.5 and list 2–3 relevant subjects or final year project.',hi:'Education section is clear and relevant to MEP engineering.'},
+      projects:{lo:'No projects listed. MEP resumes need projects with: system type, building typology, scale (sqft or floors), and your scope (design/coordination/commissioning).',mi:'Projects listed but need technical depth. Add system type, capacity, BIM coordination scope, and design codes followed.',hi:'Projects section clearly demonstrates MEP design and coordination capability.'},
+      achievements:{lo:'Add: LEED AP or Green Associate, energy audit outcomes, cost savings from system optimisation, certifications, or academic rank.',mi:'Some achievements present. Quantify: energy saved (%), cost reduced (₹), capacity optimised (TR/kW).',hi:'Achievements are relevant and strengthen your MEP engineering profile.'},
+    },
+    actions:{
+      contact:'Add all contact details: name, phone, email, LinkedIn. LEED AP or other certifications can be noted near your name.',
+      summary:'Rewrite: name your MEP system (HVAC/Electrical/Plumbing), tools (Revit MEP, Carrier HAP, DIALux), codes (ASHRAE, NBC), and one system outcome (capacity, floors, energy savings).',
+      experience:'Add action verbs (Designed, Commissioned, Coordinated). Add numbers: system capacity (TR/kW), floors, area (sqft), building type, or energy savings %.',
+      skills:'Add: Revit MEP, AutoCAD MEP, Carrier HAP, DIALux, ETAP, BMS. Include system terms (VRF, Chiller, Ductwork, LV/HV). Group by discipline.',
+      education:'Complete education: degree, institute, year, CGPA (≥7.5), and relevant subjects or final year project.',
+      projects:'List MEP projects with: system type, building typology, capacity (TR/kW), and your scope (design/coordination/commissioning). Mention codes followed.',
+      achievements:'Add: LEED AP/Green Associate, energy audit results, cost savings from system work, certifications, or academic merit.',
+    }
+  }
+};
+
+// ── JD keyword matching ─────────────────────────────────────
+const JD_STOP=new Set(['the','and','for','with','you','your','are','will','have','has','this','that','from','our','a','an','of','to','in','on','as','is','be','at','or','we','it','by','their','who','can','all','role','job','team','work','experience','skills','years','strong','ability','including','etc','into','more','than','such','not','also','they','them','job description','about','over','any','other','both','per','per week','looking','candidate','candidates','ideal','description','responsibilities','requirements','preferred','plus','using','essential','strongly','desirable','must','know','knows','knowledge','produce','produces','run','runs','manage','required','require','requires','hiring','hire','junior','senior','will','would','handle','handling','join','need','needs','needed','well','good','great','ensure','ensuring','support','across','within','based','like','seeking','seek','apply','offer','offers','make','made','take','takes','get','new','use','uses','used','help','helps','helping','across','various','multiple','several','excellent','proven','relevant','ideal','following','provide','providing','working','works','worked','you','yours','who','what','when','where','why','how','may','might','should','could','must']);
+function extractJDKeywords(jd){
+  const words=jd.toLowerCase().match(/[a-z][a-z0-9+#/]{2,}/g)||[];
+  const freq={};
+  words.forEach(w=>{ if(JD_STOP.has(w)||w.length<3) return; freq[w]=(freq[w]||0)+1; });
+  return Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,25).map(e=>e[0]);
+}
+
+// ── AI key persistence ───────────────────────────────────────
+const AI_KEY_STORAGE='resume_builder_ai_key_v1';
+function onAIRememberChange(){
+  try{
+    if($('ai-remember').checked){ if($('ai-key').value.trim())localStorage.setItem(AI_KEY_STORAGE,$('ai-key').value.trim()); }
+    else localStorage.removeItem(AI_KEY_STORAGE);
+  }catch(e){}
+}
+function onAIKeyInput(){ try{ if($('ai-remember').checked)localStorage.setItem(AI_KEY_STORAGE,$('ai-key').value.trim()); }catch(e){} }
+function loadAIKey(){ try{ const k=localStorage.getItem(AI_KEY_STORAGE); if(k){ $('ai-key').value=k; $('ai-remember').checked=true; } }catch(e){} }
+function setScoringLoading(on){
+  const b=$('scoreBtn'); if(!b)return;
+  b.disabled=on;
+  b.innerHTML=on?'Scoring…':'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8" cy="8" r="6"></circle><path d="M8 5v3l2 2"></path></svg> Analyse &amp; Score My Resume';
+}
+
+// ── AI-powered scoring (bring-your-own key) ──────────────────
+async function aiScore(resumeText,jdText,discKey,key){
+  const discLabel=DISC[discKey].label;
+  const prompt=`You are scoring a resume for a candidate targeting an AEC (Architecture/Engineering/Construction) role in the ${discLabel} discipline.
+
+Resume text:
+"""
+${resumeText.slice(0,6000)}
+"""
+${jdText?`Job description to match against:
+"""
+${jdText.slice(0,4000)}
+"""
+`:''}
+Score each section 0-10 (contact, summary, experience, skills, education, projects, achievements)${jdText?', plus a jd_match score 0-10 for how well the resume matches the job description':''}. For each section give one short (max 30 words) feedback sentence. List up to 6 prioritised action points as {"section":"","advice":""}, advice under 30 words, worst sections first.${jdText?' Also list up to 10 important terms from the JD missing from the resume as jd_missing.':''}
+
+Respond with ONLY a JSON object, no markdown fences, no preamble, matching exactly this shape:
+{"scores":{"contact":0,"summary":0,"experience":0,"skills":0,"education":0,"projects":0,"achievements":0${jdText?',"jd_match":0':''}},"feedback":{"contact":"","summary":"","experience":"","skills":"","education":"","projects":"","achievements":""},"actions":[{"section":"","advice":""}]${jdText?',"jd_missing":[]':''},"overall_summary":""}`;
+  const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-5',max_tokens:1200,messages:[{role:'user',content:prompt}]})
+  });
+  if(!resp.ok){ const t=await resp.text(); throw new Error('API error '+resp.status+': '+t.slice(0,200)); }
+  const data=await resp.json();
+  const textBlock=(data.content||[]).find(b=>b.type==='text');
+  if(!textBlock)throw new Error('No text in API response');
+  return JSON.parse(textBlock.text.replace(/```json|```/g,'').trim());
+}
+function bc(n){return n>=8?'var(--success)':n>=6?'color-mix(in srgb,var(--warn) 60%,var(--success))':n>=4?'var(--warn)':'var(--error)';}
+function renderAIResults(result,jdText){
+  const SECS=['contact','summary','experience','skills','education','projects','achievements'];
+  const LABS=['Contact & Links','Professional Summary','Work Experience','Technical Skills','Education','Projects','Achievements'];
+  const W=[10,15,30,20,10,10,5];
+  const scores=SECS.map(s=>Math.max(0,Math.min(10,Math.round(Number(result.scores?.[s])||0))));
+  let totalW=W.reduce((a,v)=>a+v,0), weightedSum=scores.reduce((a,sc,i)=>a+(sc/10)*W[i],0), jdScore=null;
+  if(jdText && result.scores && typeof result.scores.jd_match!=='undefined'){
+    jdScore=Math.max(0,Math.min(10,Math.round(Number(result.scores.jd_match)||0))); totalW+=25; weightedSum+=(jdScore/10)*25;
+  }
+  const overall=Math.round(weightedSum/totalW*100);
+  $('ringNum').textContent=overall;
+  const circ=264;$('ringCircle').style.strokeDashoffset=circ-(overall/100)*circ;
+  $('ringCircle').style.stroke=overall>=75?'var(--success)':overall>=50?'var(--warn)':'var(--error)';
+  $('score-disc-label').textContent=DISC[currentDisc].label+' Resume · AI-scored';
+  $('score-summary-text').textContent=result.overall_summary||(overall>=75?'Strong resume with good technical depth.':overall>=50?'Decent foundation, needs targeted improvements.':'Needs significant work before sending.');
+  const v=$('score-verdict');
+  const vc=overall>=75?{t:'Ready to send with minor tweaks',bg:'color-mix(in srgb,var(--success) 13%,var(--surface))',c:'var(--success)'}:overall>=50?{t:'Needs improvement before sending',bg:'color-mix(in srgb,var(--warn) 13%,var(--surface))',c:'var(--warn)'}:{t:'Needs significant work',bg:'color-mix(in srgb,var(--error) 13%,var(--surface))',c:'var(--error)'};
+  v.textContent=vc.t;v.style.background=vc.bg;v.style.color=vc.c;
+  let cardsHtml=SECS.map((s,i)=>{
+    const n=scores[i],fb=esc((result.feedback&&result.feedback[s])||''),icon=n<=4?'❌':n<=7?'⚠️':'✅';
+    return`<div class="sec-score-card"><div class="sec-score-head"><div><div class="sec-score-name">${LABS[i]}</div></div><div style="text-align:right;"><span class="sec-score-num" style="color:${bc(n)}">${n}</span><span style="color:var(--faint);font-size:var(--text-xs);"> /10</span></div></div><div class="sec-score-bar"><span style="width:${n*10}%;background:${bc(n)}"></span></div><div class="fb-item"><span>${icon}</span><span>${fb}</span></div></div>`;
+  }).join('');
+  if(jdScore!==null){
+    const missing=(result.jd_missing||[]).slice(0,10);
+    const icon=jdScore<=4?'❌':jdScore<=7?'⚠️':'✅';
+    const fb=esc('JD match score '+jdScore+'/10.'+(missing.length?' Missing: '+missing.join(', ')+'.':''));
+    cardsHtml+=`<div class="sec-score-card"><div class="sec-score-head"><div><div class="sec-score-name">JD Match</div></div><div style="text-align:right;"><span class="sec-score-num" style="color:${bc(jdScore)}">${jdScore}</span><span style="color:var(--faint);font-size:var(--text-xs);"> /10</span></div></div><div class="sec-score-bar"><span style="width:${jdScore*10}%;background:${bc(jdScore)}"></span></div><div class="fb-item"><span>${icon}</span><span>${fb}</span></div></div>`;
+  }
+  $('sectionScores').innerHTML=cardsHtml;
+  const acts=(result.actions||[]).slice(0,6);
+  $('actionList').innerHTML=acts.length?acts.map((a,idx)=>{
+    const i=SECS.indexOf(a.section);
+    const lab=i>=0?LABS[i]:(a.section==='jd_match'?'JD Match':(a.section||'Improvement'));
+    return`<div class="action-item"><div class="action-num">${idx+1}</div><div class="action-text"><strong>${esc(lab)}</strong><span>${esc(a.advice||'')}</span></div></div>`;
+  }).join(''):'<div class="action-item"><div class="action-num">✓</div><div class="action-text"><strong>Your resume is in strong shape!</strong><span>Review section feedback above for final polish.</span></div></div>';
+  const r=$('scoreResults');r.style.display='block';
+  setTimeout(()=>r.scrollIntoView({behavior:'smooth',block:'start'}),80);
+}
+
+// ── Score engine (dispatcher) ─────────────────────────────────
+async function runScore(){
+  const text=$('score-paste').value.trim();
+  if(text.length<80){alert('Please paste more of your resume before scoring — at least a few sections.');return;}
+  const jdText=$('jd-paste')?$('jd-paste').value.trim():'';
+  const key=$('ai-key')?$('ai-key').value.trim():'';
+  if(key){
+    setScoringLoading(true);
+    try{
+      const result=await aiScore(text,jdText,currentDisc,key);
+      renderAIResults(result,jdText);
+      return;
+    }catch(err){
+      alert('AI scoring failed: '+(err.message||'unknown error')+'. Falling back to the offline scorer.');
+    }finally{
+      setScoringLoading(false);
+    }
+  }
+  runHeuristicScore(text,jdText);
+}
+
+// ── Offline heuristic scorer (no key required) ─────────────────
+function runHeuristicScore(text,jdText){
+  const disc=DISC[currentDisc], lo=text.toLowerCase();
+  let jdKeys=[],jdMatched=[],jdMissing=[],jdScore=null;
+  if(jdText.length>=40){
+    const a=jdAnalyse(text,jdText);
+    jdKeys=a.keys;jdMatched=a.matched;jdMissing=a.missing;jdScore=a.score;
+  }
+  const has=pat=>pat.test(text);
+  const hasSummary=has(/summary|objective|profile|about/i);
+  const hasExp=has(/experience|work|employment|intern/i);
+  const hasEdu=has(/education|degree|university|college|b\.?tech|b\.?arch|b\.?e\b/i);
+  const hasSkills=has(/skills?|tools?|software|proficien|techni/i);
+  const hasProj=has(/project|thesis|dissertation|competition/i);
+  const hasAch=has(/achievement|award|certif|recogni|leadership|nasa|gate|scholarship|rank/i);
+  const hasPhone=has(/(\+?\d[\d\s\-]{8,14}\d)/);
+  const hasEmail=has(/\b[\w.+-]+@[\w-]+\.\w+\b/);
+  const hasLI=has(/linkedin\.com/i);
+  const hasName=text.split('\n')[0].trim().length>2;
+  const kd=kws=>{if(!kws||!kws.length)return 0;return kws.filter(k=>lo.includes(k.toLowerCase())).length/kws.length;};
+  function score(sec){
+    const k=disc.kw[sec]||[], d=kd(k);
+    switch(sec){
+      case 'contact': return Math.round(([hasName,hasPhone,hasEmail,hasLI].filter(Boolean).length/4)*10);
+      case 'summary': return hasSummary?Math.min(10,Math.max(3,Math.round(3+d*7))):2;
+      case 'experience': return hasExp?Math.min(10,Math.max(3,Math.round(3+d*7))):1;
+      case 'skills': return hasSkills?Math.min(10,Math.max(3,Math.round(3+d*7))):1;
+      case 'education': return hasEdu?Math.min(10,Math.max(5,Math.round(5+d*5))):2;
+      case 'projects': return hasProj?Math.min(10,Math.max(3,Math.round(3+d*7))):2;
+      case 'achievements': return hasAch?Math.min(10,Math.max(4,Math.round(4+d*6))):3;
+    }
+  }
+  const SECS=['contact','summary','experience','skills','education','projects','achievements'];
+  const LABS=['Contact & Links','Professional Summary','Work Experience','Technical Skills','Education','Projects','Achievements'];
+  const W=[10,15,30,20,10,10,5];
+  const scores=SECS.map(s=>score(s));
+  let totalW=W.reduce((a,v)=>a+v,0), weightedSum=scores.reduce((a,sc,i)=>a+(sc/10)*W[i],0);
+  if(jdScore!==null){ totalW+=25; weightedSum+=(jdScore/10)*25; }
+  const overall=Math.round(weightedSum/totalW*100);
+  // Ring
+  $('ringNum').textContent=overall;
+  const circ=264;$('ringCircle').style.strokeDashoffset=circ-(overall/100)*circ;
+  $('ringCircle').style.stroke=overall>=75?'var(--success)':overall>=50?'var(--warn)':'var(--error)';
+  // Banner
+  $('score-disc-label').textContent=disc.label+' Resume';
+  $('score-summary-text').textContent=overall>=75?'Strong resume with good technical depth. Targeted improvements could push it to top-tier.':overall>=50?'Decent foundation, but missing technical specifics and metrics that AEC employers look for.':'Your resume needs significant work before sending. The action points below will help most.';
+  const v=$('score-verdict');
+  const vc=overall>=75?{t:'Ready to send with minor tweaks',bg:'color-mix(in srgb,var(--success) 13%,var(--surface))',c:'var(--success)'}:overall>=50?{t:'Needs improvement before sending',bg:'color-mix(in srgb,var(--warn) 13%,var(--surface))',c:'var(--warn)'}:{t:'Needs significant work',bg:'color-mix(in srgb,var(--error) 13%,var(--surface))',c:'var(--error)'};
+  v.textContent=vc.t;v.style.background=vc.bg;v.style.color=vc.c;
+  // Bar color
+  function bc(n){return n>=8?'var(--success)':n>=6?'color-mix(in srgb,var(--warn) 60%,var(--success))':n>=4?'var(--warn)':'var(--error)';}
+  function getFb(sec,n){const f=disc.fb[sec];if(!f)return'';return n<=4?f.lo:n<=7?f.mi:f.hi;}
+  // Section cards
+  let sectionCardsHtml=SECS.map((s,i)=>{
+    const n=scores[i],fb=getFb(s,n),icon=n<=4?'❌':n<=7?'⚠️':'✅';
+    return`<div class="sec-score-card">
+      <div class="sec-score-head"><div><div class="sec-score-name">${LABS[i]}</div></div><div style="text-align:right;"><span class="sec-score-num" style="color:${bc(n)}">${n}</span><span style="color:var(--faint);font-size:var(--text-xs);"> /10</span></div></div>
+      <div class="sec-score-bar"><span style="width:${n*10}%;background:${bc(n)}"></span></div>
+      <div class="fb-item"><span>${icon}</span><span>${fb}</span></div>
+    </div>`;
+  }).join('');
+  if(jdScore!==null){
+    const icon=jdScore<=4?'❌':jdScore<=7?'⚠️':'✅';
+    const fb=jdMatched.length+' of '+jdKeys.length+' key JD terms found in your resume.'+(jdMissing.length?' Missing: '+jdMissing.slice(0,10).join(', ')+'.':'');
+    sectionCardsHtml+=`<div class="sec-score-card">
+      <div class="sec-score-head"><div><div class="sec-score-name">JD Match</div></div><div style="text-align:right;"><span class="sec-score-num" style="color:${bc(jdScore)}">${jdScore}</span><span style="color:var(--faint);font-size:var(--text-xs);"> /10</span></div></div>
+      <div class="sec-score-bar"><span style="width:${jdScore*10}%;background:${bc(jdScore)}"></span></div>
+      <div class="fb-item"><span>${icon}</span><span>${fb}</span></div>
+    </div>`;
+  }
+  $('sectionScores').innerHTML=sectionCardsHtml;
+  // Action points — worst first
+  const sorted=[...SECS.map((s,i)=>({s,i,n:scores[i],lab:LABS[i]}))];
+  if(jdScore!==null)sorted.push({s:'jd',i:-1,n:jdScore,lab:'JD Match'});
+  sorted.sort((a,b)=>a.n-b.n);
+  const acts=disc.actions;
+  const actText=x=>x.s==='jd'?('Weave these missing JD terms into your summary, skills, or experience bullets — where genuinely true: '+jdMissing.slice(0,8).join(', ')+'.'):(acts[x.s]||'');
+  $('actionList').innerHTML=sorted.slice(0,6).filter(x=>x.n<9).map((x,idx)=>`
+    <div class="action-item"><div class="action-num">${idx+1}</div><div class="action-text"><strong>${x.lab}</strong><span>${actText(x)}</span></div></div>`).join('')
+    ||'<div class="action-item"><div class="action-num">✓</div><div class="action-text"><strong>Your resume is in strong shape!</strong><span>Review section feedback above for final polish.</span></div></div>';
+  // Show results
+  const r=$('scoreResults');r.style.display='block';
+  setTimeout(()=>r.scrollIntoView({behavior:'smooth',block:'start'}),80);
+}
+
+function doPrint(){exportPDF();}
+function printFallback(){window.print();}
+
+// ── Word (.doc) export ─────────────────────────────────────
+function exportWord(){
+  const name=($('f-name').value||'Resume').trim();
+  const accent=getComputedStyle(document.documentElement).getPropertyValue('--resume-accent').trim()||'#0f6a6e';
+  const style=`body{font-family:Calibri,Arial,sans-serif;color:#1a1a1a;}
+    .resume-name{font-size:20pt;margin:0 0 4pt;}
+    .resume-role{color:#4a4a4a;font-size:11pt;margin:2pt 0 10pt;}
+    .resume-meta{font-size:9pt;color:#4a4a4a;}
+    .resume-meta a{color:${accent};}
+    .resume-section{margin:12pt 0;}
+    .resume-section h3{font-size:10pt;letter-spacing:1pt;text-transform:uppercase;color:${accent};border-bottom:1pt solid #ddd;margin:0 0 4pt;padding-bottom:2pt;}
+    .resume-section p,.resume-section li{font-size:10.5pt;line-height:1.4;}
+    .resume-kv strong{font-size:11pt;}
+    .dloc{color:#666;font-size:9.5pt;}`;
+  const pre=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>${esc(name)} Resume</title><style>${style}</style></head><body>`;
+  const post=`</body></html>`;
+  const blob=new Blob(['\ufeff',pre,$('resumePaper').innerHTML,post],{type:'application/msword'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=name.replace(/\s+/g,'_')+'_Resume.doc';document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+// ── Draft autosave (localStorage — this file only, never sent anywhere) ──
+const DRAFT_KEY='resume_builder_draft_v1';
+const ENTRY_FIELDS={
+  'edu-entries':['edu-degree','edu-inst','edu-year','edu-grade','edu-course'],
+  'exp-entries':['exp-role','exp-company','exp-dates','exp-loc','exp-bullets'],
+  'proj-entries':['proj-title','proj-desc'],
+  'skill-entries':['skill-cat','skill-items'],
+  'ach-entries':['ach-role','ach-period','ach-desc']
+};
+function serializeEntries(cid){
+  return Array.from($$('#'+cid+' .entry')).map(e=>{
+    const o={};ENTRY_FIELDS[cid].forEach(c=>{o[c]=e.querySelector('.'+c)?.value||'';});return o;
+  });
+}
+function restoreEntries(cid,addFn,arr){
+  $(cid).innerHTML='';
+  arr.forEach(o=>{
+    addFn();
+    const list=$$('#'+cid+' .entry'),e=list[list.length-1];
+    ENTRY_FIELDS[cid].forEach(c=>{const el=e.querySelector('.'+c);if(el)el.value=o[c]||'';});
+  });
+}
+function collectDraft(){
+  return{
+    basic:{name:$('f-name').value,role:$('f-role').value,phone:$('f-phone').value,email:$('f-email').value,linkedin:$('f-linkedin').value,location:$('f-location').value},
+    summary:$('f-summary').value,
+    edu:serializeEntries('edu-entries'),exp:serializeEntries('exp-entries'),proj:serializeEntries('proj-entries'),
+    skill:serializeEntries('skill-entries'),ach:serializeEntries('ach-entries'),
+    style:Object.assign({},resumeStyle),
+    template:'tpl-'+(STYLE_PRESETS[resumeStyle.preset]?resumeStyle.preset:'classic'),
+    accent:getComputedStyle(document.documentElement).getPropertyValue('--resume-accent').trim()||'#0f6a6e'
+  };
+}
+function applyDraft(d){
+  if(!d)return;
+  $('f-name').value=d.basic?.name||'';$('f-role').value=d.basic?.role||'';$('f-phone').value=d.basic?.phone||'';
+  $('f-email').value=d.basic?.email||'';$('f-linkedin').value=d.basic?.linkedin||'';$('f-location').value=d.basic?.location||'';
+  $('f-summary').value=d.summary||'';
+  restoreEntries('edu-entries',addEdu,d.edu||[]);
+  restoreEntries('exp-entries',addExp,d.exp||[]);
+  restoreEntries('proj-entries',addProj,d.proj||[]);
+  restoreEntries('skill-entries',addSkill,d.skill||[]);
+  restoreEntries('ach-entries',addAch,d.ach||[]);
+  resumeStyle=styleFromDraft(d);
+  if(d.accent){
+    const swEl=Array.from($$('#colorGrid .color-swatch')).find(c=>c.dataset.color===d.accent);
+    selectColor(d.accent,swEl);
+  }
+  buildStyleUI();applyStyle();syncPreview();
+}
+let autosaveTimer=null;
+function scheduleAutosave(){clearTimeout(autosaveTimer);autosaveTimer=setTimeout(()=>{saveDraft(false);if(typeof syncActiveVersion==='function')syncActiveVersion();},900);}
+function saveDraft(manual){
+  try{
+    localStorage.setItem(DRAFT_KEY,JSON.stringify(collectDraft()));
+    if(manual){
+      ['draftStatus','draftStatusMob'].forEach(id=>{
+        const s=$(id);if(!s)return;
+        s.textContent='Saved ✓';setTimeout(()=>{s.textContent='Save draft';},1400);
+      });
+    }
+  }catch(e){if(manual)alert('Could not save — your browser may be blocking local storage.');}
+}
+function loadDraftOnStart(){
+  try{
+    const raw=localStorage.getItem(DRAFT_KEY);
+    if(raw){applyDraft(JSON.parse(raw));return;}
+  }catch(e){}
+  applyDraft(JSON.parse(JSON.stringify(SAMPLE_DRAFT)));
+}
+
+/* boot moved to end of file — SAMPLE_DRAFT is declared below */
+
+/* ═══════════════════════════════════════════════════════════════
+   v6 — import · in-builder job match · versions · true-text PDF
+        synonym matching · bullet coach · sample data
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── 5. AEC SYNONYM MAP ───────────────────────────────────────
+   First item in each group is the canonical label shown to the user. */
+const SYN_GROUPS=[
+  ['revit','autodesk revit','revit mep','revit architecture','revit structure'],
+  ['bim','building information modelling','building information modeling','bim coordination','bim 360','common data environment'],
+  ['autocad','auto cad','cad drafting','2d drafting'],
+  ['sketchup','trimble sketchup'],
+  ['rhino','rhinoceros','grasshopper','parametric modelling','parametric modeling'],
+  ['navisworks','clash detection','clash coordination'],
+  ['staad','staad pro','staadpro'],
+  ['etabs','csi etabs'],
+  ['sap2000','csi sap'],
+  ['tekla','tekla structures'],
+  ['primavera','primavera p6','p6 scheduling'],
+  ['ms project','microsoft project'],
+  ['hap','hourly analysis program','carrier hap'],
+  ['dialux','dialux evo','relux'],
+  ['ashrae','ashrae standards','ashrae 90 1','ashrae 62 1'],
+  ['nbc','national building code','ecbc'],
+  ['is codes','is 456','is 875','indian standards','sp 16'],
+  ['leed','igbc','griha','green building','well certification'],
+  ['hvac','heating ventilation','air conditioning','chilled water','vrf','ahu'],
+  ['mep','mechanical electrical plumbing','mepf'],
+  ['plumbing','water supply','drainage','sanitary'],
+  ['firefighting','fire protection','sprinkler','nfpa'],
+  ['electrical design','power distribution','load calculation','panel schedule','cable sizing'],
+  ['bms','building management system','scada','automation'],
+  ['energy modelling','energy modeling','energy simulation','equest','ies ve','load estimation'],
+  ['shop drawings','fabrication drawings','gfc drawings','good for construction'],
+  ['working drawings','construction documentation','detailing','construction drawings'],
+  ['tender','bid','bidding','rfp','rfq','boq','bill of quantities','tendering'],
+  ['site supervision','site execution','construction supervision','site coordination','site visits'],
+  ['quality control','qa qc','quality assurance','snagging'],
+  ['project management','project coordination','project delivery','project planning'],
+  ['led a team','managed a team','team lead','led team','managed team','supervised','headed','mentored','line managed'],
+  ['stakeholder management','client management','client coordination','client liaison','client facing'],
+  ['presentations','pitch deck','client presentation','design presentation','storyboarding'],
+  ['space planning','layout planning','space plan','area programming'],
+  ['sustainable design','sustainability','net zero','passive design','energy efficient','carbon'],
+  ['structural analysis','structural design','structural calculations','load analysis','seismic design'],
+  ['estimation','cost estimation','costing','quantity takeoff','take off','budgeting'],
+  ['coordination','interdisciplinary coordination','cross functional','multi disciplinary'],
+  ['3d visualisation','3d visualization','rendering','renders','lumion','enscape','v ray','vray','twinmotion'],
+  ['photoshop','adobe photoshop'],['illustrator','adobe illustrator'],['indesign','adobe indesign'],
+  ['archicad','graphisoft archicad'],
+  ['interior design','interiors','fit out','fitout','turnkey'],
+  ['masterplanning','master planning','urban design','town planning'],
+  ['landscape','landscape design','hardscape','softscape'],
+  ['facade','façade','curtain wall','envelope','cladding'],
+  ['permits','approvals','statutory approvals','regulatory compliance','code compliance'],
+  ['contract administration','contracts','fidic','variation orders'],
+  ['revit families','parametric families','family creation'],
+  ['as built','as built drawings','record drawings'],
+  ['procurement','vendor management','supplier coordination','material selection'],
+  ['excel','ms excel','microsoft excel','spreadsheets'],
+  ['communication','written communication','verbal communication','presentation skills'],
+];
+const SYN_WORDS=(()=>{const s=new Set();SYN_GROUPS.forEach(g=>g.forEach(v=>v.split(' ').forEach(w=>s.add(w))));return s;})();
+const nrm=t=>' '+(t||'').toLowerCase().replace(/[^a-z0-9+#]+/g,' ').replace(/\s+/g,' ').trim()+' ';
+const hasTerm=(hay,term)=>hay.indexOf(' '+term+' ')!==-1;
+
+/* Synonym-aware JD gap analysis — replaces raw frequency matching. */
+function jdAnalyse(resumeText,jdText){
+  const R=nrm(resumeText),J=nrm(jdText);
+  const out=[],covered=new Set();
+  SYN_GROUPS.forEach(g=>{
+    if(!g.some(v=>hasTerm(J,v)))return;
+    const hit=g.some(v=>hasTerm(R,v));
+    out.push({label:g[0],hit,syn:true});
+    g.forEach(v=>v.split(' ').forEach(w=>covered.add(w)));
+  });
+  const seen=new Set(out.map(o=>o.label));
+  extractJDKeywords(jdText).forEach(k=>{
+    const sing=k.replace(/(?:ies)$/,'y').replace(/(?:es|s)$/,'');
+    if(covered.has(k)||covered.has(sing)||SYN_WORDS.has(k)||SYN_WORDS.has(sing))return;
+    if(seen.has(k)||seen.has(sing)||seen.has(k+'s'))return;
+    if(out.length>=30)return;
+    seen.add(k);seen.add(sing);
+    out.push({label:k,hit:hasTerm(R,k)||hasTerm(R,sing),syn:false});
+  });
+  const matched=out.filter(o=>o.hit).map(o=>o.label);
+  const missing=out.filter(o=>!o.hit).map(o=>o.label);
+  return {terms:out,keys:out.map(o=>o.label),matched,missing,
+          score:out.length?Math.round(matched.length/out.length*10):null};
+}
+
+/* ─── Builder state → plain resume text (used by job match + coach) ─── */
+function buildResumeText(){
+  const g=id=>($(id)?$(id).value:'');
+  const v=(e,c)=>(e.querySelector('.'+c)?.value||'');
+  const t=[g('f-name'),g('f-role'),
+    [g('f-phone'),g('f-email'),g('f-linkedin'),g('f-location')].filter(Boolean).join(' | '),
+    '','PROFESSIONAL SUMMARY',g('f-summary'),'','CORE COMPETENCIES'];
+  $$('#skill-entries .entry').forEach(e=>t.push(v(e,'skill-cat')+': '+v(e,'skill-items')));
+  t.push('','EXPERIENCE');
+  $$('#exp-entries .entry').forEach(e=>{
+    t.push([v(e,'exp-role'),v(e,'exp-company'),v(e,'exp-dates'),v(e,'exp-loc')].filter(Boolean).join(' · '));
+    t.push(v(e,'exp-bullets'));
+  });
+  t.push('','PROJECTS');
+  $$('#proj-entries .entry').forEach(e=>t.push(v(e,'proj-title')+': '+v(e,'proj-desc')));
+  t.push('','ACHIEVEMENTS');
+  $$('#ach-entries .entry').forEach(e=>t.push([v(e,'ach-role'),v(e,'ach-period')].filter(Boolean).join(' · ')+'\n'+v(e,'ach-desc')));
+  t.push('','EDUCATION');
+  $$('#edu-entries .entry').forEach(e=>t.push([v(e,'edu-degree'),v(e,'edu-inst'),v(e,'edu-year'),v(e,'edu-grade'),v(e,'edu-course')].filter(Boolean).join(' · ')));
+  return t.join('\n');
+}
+
+/* ─── 2. JOB MATCH INSIDE THE BUILDER ─────────────────────── */
+function runBuildJobMatch(){
+  const jd=($('build-jd').value||'').trim(), box=$('buildJDResult');
+  if(jd.length<40){box.innerHTML='<div class="hint">Paste at least a paragraph of the job description — a couple of lines is not enough to analyse.</div>';return;}
+  const a=jdAnalyse(buildResumeText(),jd);
+  if(!a.terms.length){box.innerHTML='<div class="hint">No recognisable requirements found in that text. Make sure you pasted the job description itself, not the company blurb.</div>';return;}
+  const pct=Math.round(a.matched.length/a.terms.length*100);
+  const col=pct>=70?'var(--success)':pct>=45?'var(--warn)':'var(--error)';
+  const chip=(o)=>`<span class="term-chip ${o.hit?'hit':'miss'}" title="${o.syn?'matched using synonyms':'literal keyword'}">${esc(o.label)}${o.syn?' <em>~</em>':''}</span>`;
+  box.innerHTML=`
+    <div class="jd-head">
+      <div><div class="eyebrow">Match against this JD</div>
+      <div style="font:800 2rem/1 var(--disp);color:${col};">${pct}%</div>
+      <p class="panel-note">${a.matched.length} of ${a.terms.length} requirements covered</p></div>
+    </div>
+    <div class="progress" style="margin:.5rem 0 var(--sp4);"><span style="width:${pct}%;background:${col};"></span></div>
+    <div class="eyebrow" style="margin-bottom:.4rem;">Missing (${a.missing.length})</div>
+    <div class="term-wrap">${a.missing.length?a.terms.filter(o=>!o.hit).map(chip).join(''):'<span class="panel-note">Nothing missing — strong match.</span>'}</div>
+    <div class="eyebrow" style="margin:var(--sp4) 0 .4rem;">Already covered (${a.matched.length})</div>
+    <div class="term-wrap">${a.terms.filter(o=>o.hit).map(chip).join('')||'<span class="panel-note">None yet.</span>'}</div>
+    <div class="hint" style="margin-top:var(--sp4);"><strong>~</strong> means matched by meaning, not exact wording (e.g. "managed a team" counts for "led a team"). Only add missing terms where they are genuinely true of your experience — keyword stuffing fails at interview.</div>
+    <button class="btn" style="margin-top:var(--sp3);" onclick="copyMissing(${JSON.stringify(a.missing).replace(/"/g,'&quot;')})">Copy missing terms</button>`;
+  if(typeof scheduleAutosave==='function')scheduleAutosave();
+}
+function copyMissing(arr){
+  const txt=arr.join(', ');
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(()=>toast('Missing terms copied'),()=>prompt('Copy these:',txt));
+  else prompt('Copy these:',txt);
+}
+function toast(msg){
+  let t=$('rbToast');
+  if(!t){t=document.createElement('div');t.id='rbToast';t.className='rb-toast';document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+/* ─── 1. RESUME IMPORT / PARSER ───────────────────────────── */
+const SEC_ALIAS={
+  summary:['professional summary','summary','profile','professional profile','objective','career objective','about me','about','overview'],
+  experience:['professional experience','work experience','experience','employment history','employment','career history','internships','internship','industry experience'],
+  education:['education','academic qualifications','academics','qualifications','educational background','academic background'],
+  skills:['core competencies','technical skills','skills','competencies','software skills','software','tools','key skills','technical proficiencies','areas of expertise'],
+  projects:['projects','key projects','academic projects','competitions','projects and competitions','selected projects','design projects'],
+  achievements:['achievements','awards','awards and achievements','leadership','leadership and achievements','certifications','honours','honors','extracurricular','activities','positions of responsibility','recognition']
+};
+const RANGE_RE=/((jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s*'?\d{2,4}|\d{1,2}\/\d{2,4}|(?:19|20)\d{2})\s*(?:–|—|-|to|until)\s*((jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s*'?\d{2,4}|\d{1,2}\/\d{2,4}|(?:19|20)\d{2}|present|current|date|now)/i;
+const SINGLE_DATE_RE=/((jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s*'?\d{2,4}|(?:19|20)\d{2})/i;
+const BULLET_RE=/^\s*[•▪◦‣·*\-–—o]\s+/;
+const DEGREE_RE=/\b(b\.?\s?arch|m\.?\s?arch|b\.?\s?tech|m\.?\s?tech|b\.?\s?e\b|m\.?\s?e\b|b\.?\s?des|m\.?\s?des|bachelor|master|diploma|ph\.?\s?d|mba|b\.?sc|m\.?sc|b\.?com|class\s*(x|xii|10|12)\b|higher secondary|intermediate|hsc|ssc|certificate)/i;
+const DATE_ONLY_RE=/^[\s(]*((jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s*'?\d{2,4}|\d{1,2}\/\d{2,4}|(?:19|20)\d{2})(\s*(?:–|—|-|to|until)\s*((jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s*'?\d{2,4}|\d{1,2}\/\d{2,4}|(?:19|20)\d{2}|present|current|now))?[\s).·|-]*$/i;
+const isWrap=l=>/^[a-z(–—,;&]/.test(l.trim());
+
+function detectHeading(line){
+  const c=(line||'').trim().replace(/[^A-Za-z& ]/g,'').replace(/\s+/g,' ').trim().toLowerCase().replace(/\s*&\s*/g,' and ');
+  if(!c||c.length>46)return null;
+  for(const k in SEC_ALIAS){ if(SEC_ALIAS[k].some(a=>c===a||c===a+'s'))return k; }
+  return null;
+}
+function splitMeta(line){
+  let l=line.trim(),dates='';
+  const m=l.match(RANGE_RE);
+  if(m){dates=m[0].replace(/\s+/g,' ').trim();l=l.replace(m[0],' ');}
+  else{
+    const s=l.match(SINGLE_DATE_RE);
+    if(s&&l.length<70){dates=s[0].trim();l=l.replace(s[0],' ');}
+  }
+  const parts=l.split(/\s*[|·•—]\s*|\s+[–]\s+|,\s+(?=[A-Z])|\s{3,}|\s+\bat\b\s+/)
+               .map(s=>s.replace(/^[\s,;:–-]+|[\s,;:–-]+$/g,'')).filter(Boolean);
+  return {dates,parts};
+}
+function parseResume(raw){
+  const text=(raw||'').replace(/\r/g,'');
+  const lines=text.split('\n');
+  const d={basic:{name:'',role:'',phone:'',email:'',linkedin:'',location:''},summary:'',edu:[],exp:[],proj:[],skill:[],ach:[]};
+
+  d.basic.email=(text.match(/[\w.+-]+@[\w-]+\.[\w.]{2,}/)||[''])[0];
+  const ph=text.match(/(\+?\d[\d\s().-]{8,15}\d)/);
+  d.basic.phone=ph?ph[0].replace(/\s+/g,' ').trim():'';
+  const li=text.match(/((?:https?:\/\/)?(?:www\.)?linkedin\.com\/[^\s|,)"']+)/i);
+  d.basic.linkedin=li?li[0].replace(/^https?:\/\//,'').replace(/^www\./,''):'';
+
+  let firstHead=lines.length;
+  for(let i=0;i<lines.length;i++){ if(detectHeading(lines[i])){firstHead=i;break;} }
+  const head=lines.slice(0,firstHead).map(l=>l.trim()).filter(Boolean);
+  const isContact=l=>/@|linkedin|github|http|\+?\d[\d\s().-]{7,}/i.test(l);
+  const nameIdx=head.findIndex(l=>!isContact(l)&&/[A-Za-z]/.test(l)&&l.split(/\s+/).length<=5&&l.length<48);
+  if(nameIdx>-1){
+    d.basic.name=head[nameIdx].replace(/\s{2,}/g,' ').trim();
+    const rest=head.slice(nameIdx+1).filter(l=>!isContact(l));
+    if(rest.length)d.basic.role=rest[0].slice(0,90);
+    if(rest.length>1)d.basic.location=rest[1].slice(0,60);
+  }
+
+  const blocks={};let cur=null;
+  lines.forEach(l=>{
+    const h=detectHeading(l);
+    if(h){cur=h;blocks[cur]=blocks[cur]||[];return;}
+    if(cur)blocks[cur].push(l);
+  });
+
+  d.summary=(blocks.summary||[]).map(l=>l.replace(BULLET_RE,'').trim()).filter(Boolean).join(' ').trim();
+
+  /* experience */
+  (function(){
+    const out=[];let e=null;
+    (blocks.experience||[]).forEach(raw=>{
+      const l=raw.trim();if(!l)return;
+      if(BULLET_RE.test(raw)){
+        if(!e){e={role:'',company:'',dates:'',loc:'',b:[]};out.push(e);}
+        e.b.push('• '+l.replace(BULLET_RE,'').trim());return;
+      }
+      if(e&&e.b.length&&isWrap(l)){ e.b[e.b.length-1]+=' '+l; return; }
+      if(e&&!e.dates&&DATE_ONLY_RE.test(l)){ e.dates=l.trim(); return; }
+      const meta=splitMeta(l);
+      if(e&&e.b.length===0&&(!e.dates||!e.company)){
+        if(meta.dates&&!e.dates)e.dates=meta.dates;
+        meta.parts.forEach(p=>{ if(!e.role)e.role=p; else if(!e.company)e.company=p; else if(!e.loc)e.loc=p; });
+        return;
+      }
+      e={role:'',company:'',dates:meta.dates,loc:'',b:[]};out.push(e);
+      meta.parts.forEach(p=>{ if(!e.role)e.role=p; else if(!e.company)e.company=p; else if(!e.loc)e.loc=p; });
+    });
+    d.exp=out.filter(x=>x.role||x.b.length).map(x=>({'exp-role':x.role,'exp-company':x.company,'exp-dates':x.dates,'exp-loc':x.loc,'exp-bullets':x.b.join('\n')}));
+  })();
+
+  /* education */
+  (function(){
+    const out=[];let e=null;
+    (blocks.education||[]).forEach(raw=>{
+      let l=raw.trim();if(!l)return;
+      const gm=l.match(/(\d{1,2}\.\d{1,2}\s*(?:\/\s*10)?\s*(?:cgpa|gpa)?|\d{1,2}(?:\.\d+)?\s*%)/i);
+      const grade=gm?gm[0].trim():'';
+      if(BULLET_RE.test(raw)&&e){ e['edu-course']=((e['edu-course']||'')+' '+l.replace(BULLET_RE,'')).trim();return; }
+      if(grade)l=l.replace(gm[0],' ');
+      const meta=splitMeta(l);
+      const parts=[];
+      meta.parts.forEach(p=>p.split(/\s*,\s*/).forEach(q=>{q=q.replace(/^[\s,;:–-]+|[\s,;:–-]+$/g,'');if(q)parts.push(q);}));
+      // a PDF wraps one qualification over several lines — only a degree starts a new one
+      if(e&&!DEGREE_RE.test(l)){
+        if(!e['edu-year']&&meta.dates)e['edu-year']=meta.dates;
+        if(!e['edu-grade']&&grade)e['edu-grade']=grade;
+        parts.forEach(p=>{ if(!e['edu-inst'])e['edu-inst']=p; else e['edu-course']=(e['edu-course']?e['edu-course']+' · ':'')+p; });
+        return;
+      }
+      e={'edu-degree':parts[0]||'','edu-inst':parts[1]||'','edu-year':meta.dates,'edu-grade':grade,'edu-course':parts.slice(2).join(' · ')};
+      out.push(e);
+    });
+    d.edu=out.filter(x=>x['edu-degree']);
+  })();
+
+  /* skills */
+  (function(){
+    const out=[],loose=[];
+    (blocks.skills||[]).forEach(raw=>{
+      const l=raw.replace(BULLET_RE,'').trim();if(!l)return;
+      const i=l.indexOf(':');
+      if(i>0&&i<40)out.push({'skill-cat':l.slice(0,i).trim(),'skill-items':l.slice(i+1).trim()});
+      else loose.push(l);
+    });
+    if(loose.length)out.push({'skill-cat':'Skills','skill-items':loose.join(' · ')});
+    d.skill=out;
+  })();
+
+  /* projects */
+  (function(){
+    const out=[];
+    (blocks.projects||[]).forEach(raw=>{
+      const l=raw.replace(BULLET_RE,'').trim();if(!l)return;
+      if(out.length&&!BULLET_RE.test(raw)&&isWrap(l)){
+        const pr=out[out.length-1];
+        if(pr['proj-desc'])pr['proj-desc']=(pr['proj-desc']+' '+l).trim();
+        else pr['proj-title']=(pr['proj-title']+' '+l).trim();
+        return;
+      }
+      const sp=l.split(/\s*[:–—]\s+|\s+[-]\s+/);
+      if(sp.length>1)out.push({'proj-title':sp[0].trim(),'proj-desc':sp.slice(1).join(' – ').trim()});
+      else if(out.length&&l.length>90)out[out.length-1]['proj-desc']=(out[out.length-1]['proj-desc']+' '+l).trim();
+      else out.push({'proj-title':l,'proj-desc':''});
+    });
+    d.proj=out;
+  })();
+
+  /* achievements */
+  (function(){
+    const out=[];let a=null;
+    (blocks.achievements||[]).forEach(raw=>{
+      const l=raw.trim();if(!l)return;
+      if(BULLET_RE.test(raw)&&a){a['ach-desc']=(a['ach-desc']+' '+l.replace(BULLET_RE,'')).trim();return;}
+      if(a&&!a['ach-period']&&DATE_ONLY_RE.test(l)){a['ach-period']=l.trim();return;}
+      if(a&&(isWrap(l)||(l.length>60&&!a['ach-desc']))){a['ach-desc']=(a['ach-desc']?a['ach-desc']+' ':'')+l;return;}
+      const meta=splitMeta(l);
+      a={'ach-role':meta.parts[0]||l,'ach-period':meta.dates||'','ach-desc':''};
+      meta.parts.slice(1).forEach(p=>{
+        if(!a['ach-period']&&SINGLE_DATE_RE.test(p))a['ach-period']=p;
+        else a['ach-role']+=' — '+p;
+      });
+      out.push(a);
+    });
+    d.ach=out;
+  })();
+
+  return d;
+}
+function importSummary(d){
+  const n=[['Name',d.basic.name],['Role',d.basic.role],['Email',d.basic.email],['Phone',d.basic.phone],['LinkedIn',d.basic.linkedin]];
+  const rows=n.map(([k,v])=>`<div class="imp-row"><span>${k}</span><strong>${v?esc(v):'<em style="color:var(--error)">not found</em>'}</strong></div>`).join('');
+  const counts=[['Summary',d.summary?d.summary.split(/\s+/).length+' words':'none'],
+    ['Experience',d.exp.length+' role(s), '+d.exp.reduce((s,e)=>s+(e['exp-bullets']?e['exp-bullets'].split('\n').filter(Boolean).length:0),0)+' bullets'],
+    ['Education',d.edu.length+' entry(ies)'],['Skills',d.skill.length+' group(s)'],
+    ['Projects',d.proj.length],['Achievements',d.ach.length]];
+  return rows+counts.map(([k,v])=>`<div class="imp-row"><span>${k}</span><strong>${v}</strong></div>`).join('');
+}
+let pendingImport=null;
+function runImport(){
+  const raw=($('import-paste').value||'').trim();
+  if(raw.length<120){$('importResult').innerHTML='<div class="hint">Paste more of your resume — at least a few sections, including the headings (Experience, Education, Skills…). The parser uses those headings to find its way.</div>';return;}
+  pendingImport=parseResume(raw);
+  const d=pendingImport;
+  const weak=!d.exp.length&&!d.edu.length;
+  $('importResult').innerHTML=`
+    <div class="card" style="padding:var(--sp4);">
+      <div class="eyebrow" style="margin-bottom:.5rem;">Here's what I found</div>
+      ${importSummary(d)}
+      ${weak?'<div class="hint" style="margin-top:.7rem;">I could not find section headings. Add lines like <strong>EXPERIENCE</strong> and <strong>EDUCATION</strong> above each block and try again.</div>':''}
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:var(--sp4);">
+        <button class="btn primary" onclick="applyImport()">Apply to builder</button>
+        <button class="btn ghost" onclick="pendingImport=null;$('importResult').innerHTML='';">Discard</button>
+      </div>
+      <p class="panel-note" style="margin-top:.6rem;">This overwrites what is currently in the builder. Save a version first if you want to keep it.</p>
+    </div>`;
+}
+function applyImport(){
+  if(!pendingImport)return;
+  applyDraft(Object.assign({template:'tpl-classic',accent:'#0f6a6e'},pendingImport));
+  toast('Imported — check every section');
+  selectSection('basic');
+  $('importResult').innerHTML='<div class="hint">Imported. Parsing is best-effort — walk through each section and fix anything that landed in the wrong field.</div>';
+  pendingImport=null;
+  if(typeof scheduleAutosave==='function')scheduleAutosave();
+}
+/* ─── PDF / TEXT FILE READING (shared by Import and Score) ─── */
+let _pdfjs=null;
+function loadPdfJs(){
+  if(_pdfjs)return _pdfjs;
+  _pdfjs=(async()=>{
+    const V='6.1.200';
+    try{
+      const m=await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/'+V+'/pdf.min.mjs');
+      m.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/'+V+'/pdf.worker.min.mjs';
+      return m;
+    }catch(e){/* fall through to the classic build */}
+    const L='3.11.174';
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/'+L+'/pdf.min.js';
+      s.onload=res;s.onerror=()=>rej(new Error('could not load the PDF reader'));
+      document.head.appendChild(s);
+    });
+    if(!window.pdfjsLib)throw new Error('PDF reader unavailable');
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/'+L+'/pdf.worker.min.js';
+    return window.pdfjsLib;
+  })();
+  _pdfjs.catch(()=>{_pdfjs=null;});
+  return _pdfjs;
+}
+/* Rebuilds line structure from positioned glyph runs — the parser and the
+   scorer both depend on headings sitting on their own lines. */
+async function pdfToText(file,onProgress){
+  const lib=await loadPdfJs();
+  const buf=await file.arrayBuffer();
+  const doc=await lib.getDocument({data:buf}).promise;
+  const out=[];
+  for(let p=1;p<=doc.numPages;p++){
+    if(onProgress)onProgress(p,doc.numPages);
+    const tc=await (await doc.getPage(p)).getTextContent();
+    const rows=new Map();
+    tc.items.forEach(it=>{
+      if(!it.str||!it.str.trim())return;
+      const y=Math.round(it.transform[5]/2.2);
+      if(!rows.has(y))rows.set(y,[]);
+      rows.get(y).push({x:it.transform[4],s:it.str});
+    });
+    Array.from(rows.keys()).sort((a,b)=>b-a).forEach(y=>{
+      const arr=rows.get(y).sort((a,b)=>a.x-b.x);
+      let line='';
+      arr.forEach(o=>{ line+=(line&&!/\s$/.test(line)&&!/^\s/.test(o.s)?' ':'')+o.s; });
+      line=line.replace(/\s+/g,' ').trim();
+      if(line)out.push(line);
+    });
+    out.push('');
+  }
+  try{doc.destroy&&doc.destroy();}catch(e){}
+  return out.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+}
+async function handleResumeFile(input,targetId,isImport){
+  const f=input.files&&input.files[0];
+  const statusId=isImport?'importFileStatus':'scoreFileStatus';
+  const say=(msg,cls)=>{const el=$(statusId);if(el){el.className='file-status '+(cls||'');el.innerHTML=msg;}};
+  input.value='';
+  if(!f)return;
+  if(f.size>15*1024*1024){say('That file is over 15 MB — too large to read in the browser.','bad');return;}
+  const isPdf=/\.pdf$/i.test(f.name)||f.type==='application/pdf';
+  const isTxt=/\.(txt|md|text)$/i.test(f.name)||/^text\//.test(f.type);
+  if(!isPdf&&!isTxt){say('Only PDF, .txt and .md files can be read. For a Word file, open it, select all, copy, and paste into the box below.','bad');return;}
+  try{
+    let text='';
+    if(isPdf){
+      say('Reading PDF…');
+      text=await pdfToText(f,(p,n)=>say('Reading PDF — page '+p+' of '+n+'…'));
+    }else{
+      text=await f.text();
+    }
+    if(!text||text.replace(/\s/g,'').length<40){
+      say('No text found in that PDF. It is probably a scan or an exported image, so there are no characters to read — which also means an ATS cannot read it. Export a text-based PDF from Word, Google Docs, or InDesign and try again.','bad');
+      return;
+    }
+    const el=$(targetId);if(el)el.value=text;
+    const words=text.split(/\s+/).filter(Boolean).length;
+    say('Read <strong>'+esc(f.name)+'</strong> — '+words+' words. Check the text below before continuing; PDF layouts sometimes scramble the order.','good');
+    if(isImport)runImport();
+  }catch(err){
+    say('Could not read that file: '+esc(err.message||'unknown error')+'. You can paste the text in manually instead.','bad');
+  }
+}
+
+/* ─── 3. VERSIONS & APPLICATION TRACKING ──────────────────── */
+const VER_KEY='resume_builder_versions_v1';
+const STATUSES=['Draft','Applied','Interviewing','Offer','Rejected','Archived'];
+let versions={active:null,list:[]};
+function loadVersions(){
+  try{const r=localStorage.getItem(VER_KEY);if(r)versions=JSON.parse(r);}catch(e){}
+  if(!versions.list)versions={active:null,list:[]};
+}
+function persistVersions(){try{localStorage.setItem(VER_KEY,JSON.stringify(versions));}catch(e){}}
+const uid=()=>'v'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function activeVersion(){return versions.list.find(v=>v.id===versions.active)||null;}
+function saveAsVersion(){
+  const name=prompt('Name this version (e.g. "Arup — BIM Coordinator"):','')||'';
+  if(!name.trim())return;
+  const v={id:uid(),name:name.trim(),company:'',role:$('f-role')?$('f-role').value:'',status:'Draft',
+           jd:$('build-jd')?$('build-jd').value:'',updated:Date.now(),data:collectDraft()};
+  versions.list.unshift(v);versions.active=v.id;persistVersions();renderVersions();
+  toast('Version saved');
+}
+function syncActiveVersion(){
+  const v=activeVersion();if(!v)return;
+  v.data=collectDraft();v.jd=$('build-jd')?$('build-jd').value:'';v.updated=Date.now();
+  persistVersions();renderVersions();
+}
+function loadVersion(id){
+  const v=versions.list.find(x=>x.id===id);if(!v)return;
+  applyDraft(v.data);
+  if($('build-jd'))$('build-jd').value=v.jd||'';
+  versions.active=id;persistVersions();renderVersions();
+  toast('Loaded: '+v.name);selectSection('basic');
+}
+function duplicateVersion(id){
+  const v=versions.list.find(x=>x.id===id);if(!v)return;
+  const c=JSON.parse(JSON.stringify(v));c.id=uid();c.name=v.name+' (copy)';c.status='Draft';c.updated=Date.now();
+  versions.list.unshift(c);persistVersions();renderVersions();toast('Duplicated');
+}
+function deleteVersion(id){
+  const v=versions.list.find(x=>x.id===id);if(!v)return;
+  if(!confirm('Delete "'+v.name+'"? This cannot be undone.'))return;
+  versions.list=versions.list.filter(x=>x.id!==id);
+  if(versions.active===id)versions.active=null;
+  persistVersions();renderVersions();
+}
+function updateVersionField(id,field,val){
+  const v=versions.list.find(x=>x.id===id);if(!v)return;
+  v[field]=val;v.updated=Date.now();persistVersions();
+  if(field==='name')$('activeVerName')&&(($('activeVerName').textContent=versions.active===id?val:$('activeVerName').textContent));
+}
+function renderVersions(){
+  const box=$('versionList');if(!box)return;
+  if(!versions.list.length){
+    box.innerHTML='<div class="hint">No versions saved yet. Build a resume, then use <strong>Save current as new version</strong> — one per application keeps things straight.</div>';
+  }else{
+    box.innerHTML=versions.list.map(v=>`
+      <div class="ver-row${v.id===versions.active?' active':''}">
+        <div class="ver-main">
+          <input class="ver-name" value="${esc(v.name)}" onchange="updateVersionField('${v.id}','name',this.value)" aria-label="Version name">
+          <div class="ver-meta">
+            <input placeholder="Company" value="${esc(v.company||'')}" onchange="updateVersionField('${v.id}','company',this.value)">
+            <input placeholder="Target role" value="${esc(v.role||'')}" onchange="updateVersionField('${v.id}','role',this.value)">
+            <select onchange="updateVersionField('${v.id}','status',this.value);renderVersions();">
+              ${STATUSES.map(s=>`<option ${s===v.status?'selected':''}>${s}</option>`).join('')}
+            </select>
+          </div>
+          <div class="ver-date">Updated ${new Date(v.updated).toLocaleDateString()} · <span class="status-dot s-${(v.status||'Draft').toLowerCase()}"></span>${esc(v.status||'Draft')}${v.id===versions.active?' · currently open':''}</div>
+        </div>
+        <div class="ver-acts">
+          <button class="mini-btn" onclick="loadVersion('${v.id}')">Open</button>
+          <button class="mini-btn" onclick="duplicateVersion('${v.id}')">Duplicate</button>
+          <button class="mini-btn" onclick="deleteVersion('${v.id}')">Delete</button>
+        </div>
+      </div>`).join('');
+  }
+  const a=activeVersion();
+  if($('activeVerName'))$('activeVerName').textContent=a?a.name:'Unsaved draft';
+  if($('verCount'))$('verCount').textContent=versions.list.length;
+}
+
+/* ─── 4. TRUE-TEXT PDF EXPORT (jsPDF, selectable text) ────── */
+function accentRGB(){
+  const hex=(getComputedStyle(document.documentElement).getPropertyValue('--resume-accent')||'#0f6a6e').trim();
+  const m=hex.replace('#','');
+  return [parseInt(m.slice(0,2),16)||15,parseInt(m.slice(2,4),16)||106,parseInt(m.slice(4,6),16)||110];
+}
+/* jsPDF's built-in fonts are WinAnsi-encoded. Any character outside that set
+   silently flips the whole text run to 2-byte output, which extractors — and
+   therefore ATS parsers — read as garbage. Map or drop those characters. */
+const WINANSI_HI='\u20AC\u201A\u0192\u201E\u2026\u2020\u2021\u02C6\u2030\u0160\u2039\u0152\u017D\u2018\u2019\u201C\u201D\u2022\u2013\u2014\u02DC\u2122\u0161\u203A\u0153\u017E\u0178';
+const PDF_SUBS={'\u20B9':'Rs. ','\u20A8':'Rs. ','\u2192':'->','\u2190':'<-','\u21D2':'=>','\u2713':'','\u2714':'',
+  '\u25AA':'-','\u25CF':'-','\u25A0':'-','\u2043':'-','\u2027':'\u00B7','\u00A0':' ','\u2009':' ','\u200B':'',
+  '\u2032':"'",'\u2033':'"','\u2264':'<=','\u2265':'>=','\u2260':'!=','\u00D7':'x'};
+function pdfSafe(s){
+  if(Array.isArray(s))return s.map(pdfSafe);
+  s=String(s==null?'':s);
+  let out='';
+  for(const ch of s){
+    if(PDF_SUBS[ch]!==undefined){out+=PDF_SUBS[ch];continue;}
+    const c=ch.codePointAt(0);
+    if(c<=0xFF||WINANSI_HI.indexOf(ch)>-1)out+=ch;
+  }
+  return out.replace(/ {2,}/g,' ');
+}
+function renderPDF(doc,d,ac,S){
+  if(!doc.__safed){
+    const _t=doc.text.bind(doc),_s=doc.splitTextToSize.bind(doc),_w=doc.getTextWidth.bind(doc);
+    doc.text=(txt,x,y,o)=>_t(pdfSafe(txt),x,y,o);
+    doc.splitTextToSize=(txt,w,o)=>_s(pdfSafe(txt),w,o);
+    doc.getTextWidth=t=>_w(pdfSafe(t));
+    doc.__safed=true;
+  }
+  const st=Object.assign({},STYLE_PRESETS.classic.s,d.style||{});
+  const D=PDF_DENSITY[st.density]||PDF_DENSITY.normal;
+  const C=styleColors('#'+ac.map(n=>n.toString(16).padStart(2,'0')).join(''),st.accentScope);
+  /* jsPDF ships only Helvetica, Times and Courier — a serif choice means Times.
+     Embedding a third family would add ~300 KB of base64 to a single-file app. */
+  const HEAD=(st.fonts==='serif'||st.fonts==='serifHead')?'times':'helvetica';
+  const BODY=(st.fonts==='serif')?'times':'helvetica';
+  const BUL={dot:'\u2022',dash:'\u2013',square:'\u25aa',none:''}[st.bullet];
+  const RW={hair:0.6,medium:1.2,thick:2.4,none:0}[st.rule];
+  const PW=595.28, M=D.M, W=PW-M*2, PH=841.89, BOT=PH-38;
+  let y=M;
+  const brk=hh=>{ if(y+hh>BOT){doc.addPage();y=M;} };
+  const setC=c=>doc.setTextColor(c[0],c[1],c[2]);
+  const para=(txt,{size=D.fs,style='normal',color=[45,45,45],lh=D.lead,indent=0,gap=0,font=BODY}={})=>{
+    if(!txt)return;
+    size*=S;
+    doc.setFont(font,style);doc.setFontSize(size);setC(color);
+    doc.splitTextToSize(String(txt).replace(/\s+/g,' ').trim(),W-indent).forEach(line=>{
+      brk(size*lh);doc.text(line,M+indent,y+size*0.9);y+=size*lh;
+    });
+    y+=gap*S;
+  };
+  const rule=(yy)=>{ if(!RW)return; doc.setDrawColor(C.rule[0],C.rule[1],C.rule[2]);doc.setLineWidth(RW);doc.line(M,yy,M+W,yy); };
+  const secHead=t=>{
+    const label=String(t).toUpperCase();
+    doc.setFont(HEAD,'bold');doc.setFontSize(9.4*S);
+    if(st.heading==='block'){
+      brk(30*S);y+=D.sec*S;
+      const tw=doc.getTextWidth(label), bw=tw+11*S, bh=13.5*S;
+      doc.setFillColor(C.head[0],C.head[1],C.head[2]);
+      doc.roundedRect(M,y,bw,bh,2,2,'F');
+      setC([255,255,255]);doc.text(label,M+5.5*S,y+bh-4.4*S);
+      y+=bh+6*S;
+    }else if(st.heading==='bar'){
+      brk(28*S);y+=D.sec*S;
+      doc.setFillColor(C.rule[0],C.rule[1],C.rule[2]);doc.rect(M,y,2.6,11.5*S,'F');
+      setC(C.head);doc.text(label,M+7.5*S,y+8.6*S);
+      y+=15*S;
+    }else if(st.heading==='ruleAbove'){
+      brk(30*S);y+=D.sec*S;rule(y);y+=6.5*S;
+      setC(C.head);doc.text(label,M,y+8*S);y+=15*S;
+    }else if(st.heading==='plain'){
+      brk(28*S);y+=D.sec*S;
+      if(doc.setCharSpace)doc.setCharSpace(1.1*S);
+      setC(C.head);doc.text(label,M,y+8*S);
+      if(doc.setCharSpace)doc.setCharSpace(0);
+      y+=15*S;
+    }else{ /* ruleUnder */
+      brk(30*S);y+=D.sec*S;
+      setC(C.head);doc.text(label,M,y+8*S);y+=12.5*S;
+      rule(y);y+=7.5*S;
+    }
+  };
+  /* ── header ── */
+  const nm=(d.basic.name||'Your Name').toUpperCase();
+  const contact=[d.basic.phone,d.basic.email,d.basic.linkedin,d.basic.location].filter(Boolean).join('   |   ');
+  const banner=(st.nameAlign==='banner'), centred=(banner||st.nameAlign==='center');
+  const split=(st.nameAlign==='split');
+  const metaW=split?W*0.42:W;
+  doc.setFont(BODY,'normal');doc.setFontSize(D.meta*S);
+  const cLines=doc.splitTextToSize(contact,metaW);
+  if(banner){
+    const hh=M+D.name*S+(d.basic.role?D.role*S+7*S:0)+cLines.length*11*S+16*S;
+    doc.setFillColor(C.banner[0],C.banner[1],C.banner[2]);
+    doc.rect(0,0,PW,hh,'F');
+  }
+  const cx=centred?PW/2:M;
+  const opt=centred?{align:'center'}:undefined;
+  doc.setFont(HEAD,'bold');doc.setFontSize(D.name*S);setC(C.name);
+  doc.text(nm,cx,y+D.name*0.9*S,opt);y+=D.name*S+4*S;
+  if(d.basic.role){
+    doc.setFont(BODY,'normal');doc.setFontSize(D.role*S);setC([80,80,80]);
+    doc.text(d.basic.role,cx,y+6*S,opt);y+=D.role*S+5*S;
+  }
+  if(split){
+    /* contact block sits to the right of the name, top-aligned */
+    let my=M+4*S;
+    doc.setFont(BODY,'normal');doc.setFontSize(D.meta*S);setC([90,90,90]);
+    doc.splitTextToSize([d.basic.phone,d.basic.email,d.basic.linkedin,d.basic.location].filter(Boolean).join('\n'),metaW)
+       .forEach(l=>{doc.text(l,M+W,my+6*S,{align:'right'});my+=11*S;});
+    y=Math.max(y,my);
+  }else if(contact){
+    doc.setFont(BODY,'normal');doc.setFontSize(D.meta*S);setC([90,90,90]);
+    cLines.forEach(l=>{doc.text(l,cx,y+6*S,opt);y+=11*S;});
+  }
+  y+=5*S;
+  if(!banner){
+    const hw=RW||1;
+    doc.setDrawColor(C.hrule[0],C.hrule[1],C.hrule[2]);
+    doc.setLineWidth(st.rule==='thick'?2.2:st.rule==='hair'?0.7:1.5);
+    doc.line(M,y,M+W,y);
+  }
+  y+=7*S;
+
+  /* ── body ── */
+  if(d.summary){secHead(SECTION_TITLES.summary);para(d.summary,{gap:2});}
+  if(d.skill&&d.skill.some(s2=>s2['skill-cat']||s2['skill-items'])){
+    secHead(SECTION_TITLES.skills);
+    d.skill.forEach(s2=>{
+      if(!s2['skill-cat']&&!s2['skill-items'])return;
+      brk(24*S);
+      doc.setFont(BODY,'bold');doc.setFontSize(D.fs*S);setC([25,25,25]);
+      const cat=(s2['skill-cat']||'')+': ';const cw=doc.getTextWidth(cat);
+      doc.text(cat,M,y+8*S);
+      doc.setFont(BODY,'normal');setC([55,55,55]);
+      const lines=doc.splitTextToSize(s2['skill-items']||'',W-cw);
+      doc.text(lines[0]||'',M+cw,y+8*S);y+=D.fs*D.lead*S;
+      lines.slice(1).forEach(l=>{brk(13*S);doc.text(l,M,y+8*S);y+=D.fs*D.lead*S;});
+    });
+  }
+  /* role heading with optional flush-right dates */
+  /* A parser reads the content stream in draw order, so the job title must be
+     written before its dates even when the dates are painted flush right. */
+  const kvHead=(main,right,sub)=>{
+    brk(30*S);
+    const flush=(st.dateAlign==='right'&&!!right);
+    let avail=W,rw=0;
+    if(flush){
+      doc.setFont(BODY,'italic');doc.setFontSize(D.dloc*S);
+      rw=doc.getTextWidth(right);avail=W-rw-14;
+    }
+    const startY=y,startPage=doc.getNumberOfPages();
+    doc.setFont(BODY,'bold');doc.setFontSize(D.kv*S);setC([20,20,20]);
+    doc.splitTextToSize(main,avail).forEach(l=>{brk(14*S);doc.text(l,M,y+8*S);y+=D.kv*1.25*S;});
+    const spilled=flush&&doc.getNumberOfPages()!==startPage;
+    if(flush&&!spilled){
+      doc.setFont(BODY,'italic');doc.setFontSize(D.dloc*S);setC([105,105,105]);
+      doc.text(right,M+W,startY+8*S,{align:'right'});
+    }
+    const subTxt=(flush&&!spilled)?sub:[right,sub].filter(Boolean).join(' \u00b7 ');
+    if(subTxt){
+      doc.setFont(BODY,'italic');doc.setFontSize(D.dloc*S);setC([105,105,105]);
+      doc.text(subTxt,M,y+6*S);y+=11*S;
+    }
+  };
+  if(d.exp&&d.exp.some(e=>e['exp-role']||e['exp-bullets'])){
+    secHead(SECTION_TITLES.experience);
+    d.exp.forEach(e=>{
+      if(!e['exp-role']&&!e['exp-bullets'])return;
+      kvHead([e['exp-role'],e['exp-company']].filter(Boolean).join(' \u00b7 '),e['exp-dates']||'',e['exp-loc']||'');
+      const ind=BUL?12:0;
+      (e['exp-bullets']||'').split('\n').map(b=>b.replace(/^[\u2022\u25aa\-\u2013*]\s*/,'').trim()).filter(Boolean).forEach(b=>{
+        doc.setFont(BODY,'normal');doc.setFontSize(D.fs*S);setC([45,45,45]);
+        doc.splitTextToSize(b,W-ind).forEach((l,i)=>{
+          brk(13*S);
+          if(i===0&&BUL){setC(C.bullet);doc.text(BUL,M,y+8*S);setC([45,45,45]);}
+          doc.text(l,M+ind,y+8*S);y+=D.fs*D.lead*S;
+        });
+      });
+      y+=4*S;
+    });
+  }
+  if(d.proj&&d.proj.some(p=>p['proj-title'])){
+    secHead(SECTION_TITLES.projects);
+    const ind=BUL?12:0;
+    d.proj.forEach(p=>{
+      if(!p['proj-title'])return;
+      brk(24*S);
+      doc.setFont(BODY,'bold');doc.setFontSize(D.fs*S);setC([20,20,20]);
+      const t=p['proj-title']+(p['proj-desc']?': ':'');const tw=doc.getTextWidth(t);
+      if(BUL){setC(C.bullet);doc.text(BUL,M,y+8*S);setC([20,20,20]);}
+      doc.text(t,M+ind,y+8*S);
+      doc.setFont(BODY,'normal');setC([45,45,45]);
+      const ls=doc.splitTextToSize(p['proj-desc']||'',W-ind-tw);
+      doc.text(ls[0]||'',M+ind+tw,y+8*S);y+=D.fs*D.lead*S;
+      ls.slice(1).forEach(l=>{brk(13*S);doc.text(l,M+ind,y+8*S);y+=D.fs*D.lead*S;});
+    });
+  }
+  if(d.ach&&d.ach.some(a=>a['ach-role']||a['ach-desc'])){
+    secHead(SECTION_TITLES.achievements);
+    d.ach.forEach(a=>{
+      if(!a['ach-role']&&!a['ach-desc'])return;
+      kvHead(a['ach-role']||'',a['ach-period']||'','');
+      para(a['ach-desc'],{gap:3});
+    });
+  }
+  if(d.edu&&d.edu.some(e=>e['edu-degree'])){
+    secHead(SECTION_TITLES.education);
+    d.edu.forEach(e=>{
+      if(!e['edu-degree'])return;
+      kvHead(e['edu-degree'],e['edu-year']||'',[e['edu-inst'],e['edu-grade']].filter(Boolean).join(' \u00b7 '));
+      if(e['edu-course'])para(e['edu-course'],{size:D.fs-0.4,gap:2});
+    });
+  }
+  return {height:y,pages:doc.getNumberOfPages(),margin:M};
+}
+const PDF_DENSITY={
+  compact:{M:36,fs:8.7,lead:1.28,sec:5,name:16.5,role:9,meta:8,kv:9.2,dloc:8.1},
+  normal: {M:42,fs:9.4,lead:1.32,sec:8,name:20,  role:10,meta:8.6,kv:10, dloc:8.6},
+  airy:   {M:50,fs:9.7,lead:1.45,sec:11,name:21, role:10.5,meta:9,kv:10.4,dloc:8.8}
+};
+function exportPDF(){
+  const lib=window.jspdf&&window.jspdf.jsPDF;
+  if(!lib){ alert('The PDF engine did not load (you may be offline). Falling back to your browser print dialog \u2014 set margins to None and untick "Headers and footers".'); window.print(); return; }
+  const d=collectDraft(), ac=accentRGB();
+  const mk=()=>new lib({unit:'pt',format:'a4',compress:true});
+  // pass 1: measure at full size
+  const probe=mk();
+  const r1=renderPDF(probe,d,ac,1);
+  const M=r1.margin||42,USABLE=841.89-38-M;
+  const total=(r1.pages-1)*USABLE+(r1.height-M);
+  // if it spills just over one page, shrink slightly rather than orphaning a few lines
+  let S=1;
+  if(r1.pages>1&&total>0){
+    const needed=USABLE/total;
+    if(needed>=0.86&&needed<1)S=Math.max(0.86,needed*0.985);
+  }
+  const doc=mk();
+  const r2=renderPDF(doc,d,ac,S);
+  const fn=((d.basic.name||'Resume').replace(/[^A-Za-z0-9]+/g,'_'))+'_Resume.pdf';
+  doc.save(fn);
+  toast(r2.pages===1?'PDF downloaded \u2014 fits one page':'PDF downloaded \u2014 '+r2.pages+' pages');
+
+}
+
+/* ─── 6. BULLET COACH ─────────────────────────────────────── */
+const STRONG_VERBS=['designed','developed','led','delivered','coordinated','produced','managed','built','implemented','optimised','optimized','reduced','increased','improved','created','executed','supervised','drafted','modelled','modeled','analysed','analyzed','presented','negotiated','launched','streamlined','resolved','specified','detailed','commissioned','audited','mentored','won','secured','scaled'];
+const HEDGES=[['responsible for','Name the action instead — what did you actually do?'],
+  ['worked on','Which verb fits? Designed, coordinated, drafted, delivered?'],
+  ['helped with','What was your own contribution, specifically?'],
+  ['assisted in','What did you own, even partly?'],
+  ['involved in','State your role directly.'],
+  ['participated in','What did you produce or change?'],
+  ['tasked with','Say what you delivered, not what you were given.'],
+  ['duties included','List outcomes, not duties.']];
+function coachBullets(){
+  const box=$('coachResult');const items=[];
+  $$('#exp-entries .entry').forEach((e,i)=>{
+    const role=e.querySelector('.exp-role')?.value||('Role '+(i+1));
+    (e.querySelector('.exp-bullets')?.value||'').split('\n').map(b=>b.trim()).filter(Boolean).forEach((b,bi)=>{
+      const clean=b.replace(/^[•▪\-–*]\s*/,'').trim();
+      const lo=clean.toLowerCase(),words=clean.split(/\s+/).length;
+      const issues=[];
+      const hedge=HEDGES.find(h=>lo.startsWith(h[0])||lo.includes(' '+h[0]));
+      if(hedge)issues.push({t:'Weak opener',a:'"'+hedge[0]+'" hides the work. '+hedge[1]});
+      const first=lo.split(/\s+/)[0].replace(/[^a-z]/g,'');
+      if(!hedge&&!STRONG_VERBS.includes(first)&&!/ed$|ing$/.test(first))issues.push({t:'No action verb',a:'Start with a past-tense verb: Designed, Coordinated, Delivered, Reduced.'});
+      if(!METRIC_RE.test(clean)&&!/\d/.test(clean))issues.push({t:'No number',a:'Add scale or outcome — sq ft, budget, headcount, drawings issued, days saved, % change.'});
+      if(words>34)issues.push({t:'Too long ('+words+' words)',a:'Cut to under 30 words. One idea per bullet.'});
+      if(/^i\s|\bmy\b/i.test(clean))issues.push({t:'First person',a:'Drop "I" and "my" — resumes use implied subject.'});
+      if(/\bvarious\b|\bseveral\b|\bmultiple\b/i.test(clean)&&!/\d/.test(clean))issues.push({t:'Vague quantity',a:'Replace "several/various/multiple" with the actual number.'});
+      if(issues.length)items.push({role,bi,clean,issues});
+    });
+  });
+  const total=$$('#exp-entries .entry').length;
+  if(!total){box.innerHTML='<div class="hint">Add an experience entry first.</div>';return;}
+  if(!items.length){box.innerHTML='<div class="diag-item"><span class="pill pass">PASS</span><p>Every bullet has an action verb, a number, and a sensible length. Nothing to fix here.</p></div>';return;}
+  const key=$('ai-key')?$('ai-key').value.trim():'';
+  box.innerHTML=items.map((it,idx)=>`
+    <div class="coach-item">
+      <div class="coach-b">${esc(it.clean)}</div>
+      <div class="coach-meta">${esc(it.role)}</div>
+      ${it.issues.map(s=>`<div class="coach-issue"><span class="pill warn">${esc(s.t)}</span><p>${esc(s.a)}</p></div>`).join('')}
+      ${key?`<button class="mini-btn" onclick="aiRewrite(${idx})" id="rw-${idx}">Rewrite with AI</button><div id="rwout-${idx}"></div>`:''}
+    </div>`).join('')+
+    (key?'':'<div class="hint" style="margin-top:var(--sp3);">Add your Anthropic API key in Score mode to get AI rewrite suggestions for each bullet.</div>');
+  window._coachItems=items;
+}
+async function aiRewrite(idx){
+  const it=(window._coachItems||[])[idx];if(!it)return;
+  const key=$('ai-key')?$('ai-key').value.trim():'';if(!key)return;
+  const btn=$('rw-'+idx),out=$('rwout-'+idx);
+  btn.disabled=true;btn.textContent='Thinking…';
+  try{
+    const prompt=`Rewrite this resume bullet for an AEC (architecture/engineering/construction) role. Keep it truthful — do not invent numbers or facts. Where a number is missing, use a bracketed placeholder like [X sq ft] the candidate must fill in. Start with a strong past-tense verb. Under 28 words.\n\nBullet: "${it.clean}"\nRole context: ${it.role}\n\nRespond with ONLY a JSON array of exactly 2 rewritten strings, no markdown fences.`;
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-5',max_tokens:400,messages:[{role:'user',content:prompt}]})});
+    if(!r.ok)throw new Error('API '+r.status);
+    const data=await r.json();
+    const tb=(data.content||[]).find(b=>b.type==='text');
+    const arr=JSON.parse(tb.text.replace(/```json|```/g,'').trim());
+    out.innerHTML='<div class="hint" style="margin-top:.5rem;">Suggestions — copy the one you like into your bullet, then fill any [placeholders]:</div>'+
+      arr.map(s=>`<div class="coach-sug">${esc(s)}</div>`).join('');
+  }catch(err){ out.innerHTML='<div class="hint" style="margin-top:.5rem;">Rewrite failed: '+esc(err.message||'unknown')+'</div>'; }
+  finally{ btn.disabled=false;btn.textContent='Rewrite with AI'; }
+}
+
+/* ─── 7. SAMPLE / BLANK ───────────────────────────────────── */
+const SAMPLE_DRAFT={
+  basic:{name:'John Doe',role:'Architect · BIM Coordinator',phone:'+91 90000 00000',email:'john.doe@example.com',linkedin:'linkedin.com/in/johndoe',location:'Gurugram · Open to relocation'},
+  summary:'Architect with four years of experience taking residential and commercial projects from concept through construction documentation. Owns BIM coordination across MEP and structural teams and translates client briefs into buildable schemes. Delivered 12 projects totalling 480,000 sq ft and cut drawing revision cycles by 30% through a standardised Revit family library.',
+  edu:[
+    {'edu-degree':'Bachelor of Architecture (B.Arch)','edu-inst':'School of Planning and Architecture, New Delhi','edu-year':'2021','edu-grade':'8.4 CGPA','edu-course':'Sustainable Design · Building Services · Urban Housing'},
+    {'edu-degree':'Class XII — Science','edu-inst':'Delhi Public School','edu-year':'2016','edu-grade':'91%','edu-course':''}
+  ],
+  exp:[
+    {'exp-role':'Architect','exp-company':'Doe & Partners Architects','exp-dates':'Jun 2023 – Present','exp-loc':'Gurugram','exp-bullets':'• Delivered construction documentation for 6 mixed-use projects totalling 320,000 sq ft, all issued on schedule.\n• Coordinated Revit models across MEP and structural consultants, resolving 240+ clashes in Navisworks before tender.\n• Standardised a 60-family Revit library that cut drawing revision cycles by 30% across the studio.\n• Led a team of 3 junior architects through design development on a ₹42 crore commercial project.'},
+    {'exp-role':'Junior Architect','exp-company':'Sample Design Associates','exp-dates':'Aug 2021 – May 2023','exp-loc':'Bengaluru','exp-bullets':'• Produced schematic and design-development drawings for 5 residential projects averaging 24,000 sq ft.\n• Presented 3 concept options per project to clients, with 4 of 5 schemes approved at first review.\n• Prepared BOQs and material schedules feeding tender packages worth ₹18 crore.'}
+  ],
+  proj:[
+    {'proj-title':'Thesis — Net-Zero Community Library','proj-desc':'Designed a 14,000 sq ft passive-cooled library; energy model showed a 42% reduction against an ECBC baseline.'},
+    {'proj-title':'Affordable Housing Competition — Finalist','proj-desc':'Developed a modular walk-up typology for 240 dwelling units; placed in the top 10 of 380 entries.'}
+  ],
+  skill:[
+    {'skill-cat':'BIM & Documentation','skill-items':'Revit · Navisworks · AutoCAD · BIM 360 · Clash Detection · Working Drawings'},
+    {'skill-cat':'Design & Visualisation','skill-items':'SketchUp · Rhino · Enscape · Lumion · Photoshop · InDesign'},
+    {'skill-cat':'Delivery','skill-items':'Space Planning · Tender Documentation · BOQ · Site Coordination · Client Presentations'}
+  ],
+  ach:[
+    {'ach-role':'IIA Young Architect Award — Regional Finalist','ach-period':'2023','ach-desc':'Recognised for a low-carbon community centre scheme selected from 140 regional entries.'},
+    {'ach-role':'Student Council — Design Head','ach-period':'2019–2020','ach-desc':'Ran a 6-city student design workshop series reaching 400+ participants and securing sponsorship from 5 industry partners.'}
+  ],
+  template:'tpl-classic',accent:'#0f6a6e'
+};
+const BLANK_DRAFT={
+  basic:{name:'',role:'',phone:'',email:'',linkedin:'',location:''},summary:'',
+  edu:[{'edu-degree':'','edu-inst':'','edu-year':'','edu-grade':'','edu-course':''}],
+  exp:[{'exp-role':'','exp-company':'','exp-dates':'','exp-loc':'','exp-bullets':''}],
+  proj:[{'proj-title':'','proj-desc':''}],skill:[{'skill-cat':'','skill-items':''}],
+  ach:[{'ach-role':'','ach-period':'','ach-desc':''}],template:'tpl-classic',accent:'#0f6a6e'
+};
+function loadSample(){
+  if(!confirm('Replace everything in the builder with the sample resume?'))return;
+  applyDraft(JSON.parse(JSON.stringify(SAMPLE_DRAFT)));toast('Sample loaded');
+}
+function clearAll(){
+  if(!confirm('Clear every field? Save a version first if you want to keep this.'))return;
+  applyDraft(JSON.parse(JSON.stringify(BLANK_DRAFT)));toast('Cleared');
+  selectSection('basic');
+}
+
+/* ─── boot ─────────────────────────────────────────────────── */
+loadVersions();
+buildStyleUI();
+applyStyle();
+loadDraftOnStart();
+loadAIKey();
+syncPreview();
+renderVersions();
+restoreTheme();
+restoreMode();
+if($('footYear'))$('footYear').textContent=new Date().getFullYear();
+
+</script>
+
+
+</body></html>
