@@ -170,6 +170,17 @@ body.in-build .header-score-wrap{display:inline-flex;}
 .disc-sub{font-size:var(--text-xs);color:var(--muted);font-weight:600;}
 .disc-card.selected .disc-sub{color:#3a2200;}
 .score-results{display:none;margin-top:var(--sp8);animation:fadeUp .3s ease;}
+.score-example{margin-top:var(--sp8);padding:var(--sp5);border:var(--bw) dashed var(--border);border-radius:var(--r-lg);background:var(--surface2);}
+.score-example-tag{font-family:var(--mono);font-size:var(--text-xs);color:var(--faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--sp4);}
+.score-example-body{display:flex;gap:var(--sp6);align-items:center;flex-wrap:wrap;}
+.score-example-ring{position:relative;width:100px;height:100px;flex-shrink:0;}
+.score-example-ring svg{width:100%;height:100%;transform:rotate(-90deg);}
+.score-example-ring>div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-example-bars{flex:1;min-width:200px;display:grid;gap:.55rem;}
+.score-example-row{display:grid;grid-template-columns:110px 1fr;align-items:center;gap:.6rem;font-size:var(--text-xs);color:var(--faint);}
+.score-example-row i{display:block;height:6px;border-radius:3px;background:var(--rule-strong);opacity:.5;}
+.score-example .panel-note{margin-top:var(--sp4);}
+@media(max-width:600px){.score-example-body{flex-direction:column;align-items:flex-start;}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .score-banner{border-radius:var(--r-xl);padding:var(--sp6);margin-bottom:var(--sp6);background:var(--surface);border:var(--bw) solid var(--border);box-shadow:var(--sh-md);display:flex;gap:var(--sp6);align-items:center;flex-wrap:wrap;}
 .score-ring{width:96px;height:96px;flex-shrink:0;position:relative;display:grid;place-items:center;}
@@ -582,7 +593,7 @@ figure figcaption{margin-top:var(--sp3);font-size:var(--text-sm);color:var(--mut
     transform:translateY(105%);transition:transform .3s cubic-bezier(.16,1,.3,1);
     display:flex;flex-direction:column;}
   body.mob-preview .build-preview{transform:translateY(0);}
-  .mob-sheet-handle{flex-shrink:0;display:flex;justify-content:center;padding:.6rem 0 .3rem;}
+  .mob-sheet-handle{flex-shrink:0;display:flex;justify-content:center;padding:.6rem 0 .3rem;width:100%;border:none;background:transparent;-webkit-tap-highlight-color:transparent;}
   .mob-sheet-handle span{width:36px;height:4px;border-radius:2px;background:var(--divider);}
   .build-preview .preview-shell{overflow-y:auto;padding:0 var(--sp4) var(--sp6);flex:1;min-height:0;}
   .preview-toolbar{position:sticky;top:0;background:var(--surface);z-index:2;padding-top:.2rem;}
@@ -1049,14 +1060,16 @@ figure figcaption{margin-top:var(--sp3);font-size:var(--text-sm);color:var(--mut
       <!-- 08 Design -->
       <div class="section-panel" id="panel-design">
         <section class="card">
-          <div class="panel-header"><div><h3 class="panel-title">Template</h3><p class="panel-note">Six starting points. Preview and PDF export always match.</p></div><button class="btn ghost" onclick="randomiseStyle()">Shuffle</button></div>
+          <div class="panel-header"><div><h3 class="panel-title">Template</h3><p class="panel-note">Three to start. Preview and PDF export always match.</p></div><button class="btn ghost" onclick="randomiseStyle()">Shuffle</button></div>
           <div class="preset-grid" id="presetGrid"></div>
+          <button class="btn ghost" id="presetShowMoreBtn" onclick="toggleAllPresets()" style="margin-top:var(--sp3);">Show all 6 templates</button>
         </section>
-        <section class="card">
-          <div class="panel-header"><div><h3 class="panel-title">Fine tuning</h3><p class="panel-note">Currently: <strong id="presetLabel">Classic</strong>. Change anything below and it becomes a custom combination.</p></div></div>
+        <details class="card adv-card">
+          <summary class="adv-summary">Advanced — fine tune typeface, headings, spacing and more</summary>
+          <div class="panel-header" style="margin-top:var(--sp3);"><div><p class="panel-note">Currently: <strong id="presetLabel">Classic</strong>. Change anything below and it becomes a custom combination.</p></div></div>
           <div class="knob-grid" id="knobGrid"></div>
           <div class="hint" style="margin-top:var(--sp4);">These are the variations that do not break ATS parsing. Columns, tables, icons, photos and skill bars are deliberately absent — they are the main reason resumes get shredded by parsers.</div>
-        </section>
+        </details>
         <section class="card">
           <div class="panel-header"><div><h3 class="panel-title">Accent Colour</h3><p class="panel-note">Applied to headings, dividers, and links in the preview.</p></div></div>
           <div class="color-grid" id="colorGrid">
@@ -1117,10 +1130,10 @@ figure figcaption{margin-top:var(--sp3);font-size:var(--text-sm);color:var(--mut
     <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8s2.5-5 6-5 6 5 6 5-2.5 5-6 5-6-5-6-5z"></path><circle cx="8" cy="8" r="2"></circle></svg>
     Preview
   </button>
-  <div class="mob-sheet-backdrop" onclick="setMobView('edit')"></div>
+  <div class="mob-sheet-backdrop" onclick="setMobView('edit')" aria-hidden="true"></div>
 
   <aside class="build-preview">
-    <div class="mob-sheet-handle" onclick="setMobView('edit')"><span></span></div>
+    <button class="mob-sheet-handle" onclick="setMobView('edit')" aria-label="Close preview"><span aria-hidden="true"></span></button>
     <div class="preview-shell">
       <div class="preview-toolbar">
         <div><div class="eyebrow">Live Preview</div><strong>ATS-safe output</strong></div>
@@ -1136,7 +1149,7 @@ figure figcaption{margin-top:var(--sp3);font-size:var(--text-sm);color:var(--mut
 
 
 <!-- Diagnostics drawer — opened from the Completeness pill in the header -->
-<div class="drawer-backdrop" id="diagBackdrop" onclick="closeDiag()"></div>
+<div class="drawer-backdrop" id="diagBackdrop" onclick="closeDiag()" aria-hidden="true"></div>
 <aside class="drawer" id="diagDrawer" aria-hidden="true" aria-label="Resume diagnostics">
   <div class="drawer-head">
     <div><div class="eyebrow">Diagnostics</div><h3 class="panel-title">Completeness &amp; ATS checks</h3></div>
@@ -1232,6 +1245,29 @@ figure figcaption{margin-top:var(--sp3);font-size:var(--text-sm);color:var(--mut
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8" cy="8" r="6"></circle><path d="M8 5v3l2 2"></path></svg>
     Analyse &amp; Score My Resume
   </button>
+
+  <!-- Shown only until the first real score exists — answers "what will I get"
+       before asking someone to paste their resume and wait. Clearly labeled
+       as an example so it is never mistaken for a real result. -->
+  <div class="score-example" id="scoreExample">
+    <div class="score-example-tag">Example — not your result</div>
+    <div class="score-example-body">
+      <div class="score-example-ring">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="var(--offset)" stroke-width="10"></circle>
+          <circle cx="50" cy="50" r="42" fill="none" stroke="var(--rule-strong)" stroke-width="10" stroke-dasharray="264" stroke-dashoffset="90" stroke-linecap="round"></circle>
+        </svg>
+        <div style="text-align:center;"><div class="score-ring-num" style="color:var(--faint);">74</div><div class="score-ring-sub">/ 100</div></div>
+      </div>
+      <div class="score-example-bars">
+        <div class="score-example-row"><span>Contact &amp; Summary</span><i style="width:92%"></i></div>
+        <div class="score-example-row"><span>Experience</span><i style="width:70%"></i></div>
+        <div class="score-example-row"><span>Skills</span><i style="width:45%"></i></div>
+        <div class="score-example-row"><span>Education</span><i style="width:85%"></i></div>
+      </div>
+    </div>
+    <p class="panel-note">You'll get a score out of 100, a breakdown per section, and specific action points — tailored to the discipline you picked above.</p>
+  </div>
 
   <!-- RESULTS -->
   <div class="hint" id="scoreSourceNote" hidden style="margin-top:var(--sp4);">Scoring the resume you built. Note this grades the text directly, while a real ATS grades text pulled out of your PDF — so treat this as the optimistic case, and export and re-upload the PDF if you want the pessimistic one.</div>
@@ -1430,19 +1466,19 @@ function matchPreset(){
 function selectPreset(id){
   if(!STYLE_PRESETS[id])return;
   resumeStyle=Object.assign({preset:id},STYLE_PRESETS[id].s);
-  applyStyle();syncPreview();
+  buildStyleUI();applyStyle();syncPreview();
   if(typeof scheduleAutosave==='function')scheduleAutosave();
 }
 function setStyleField(k,v){
   resumeStyle[k]=v; resumeStyle.preset=matchPreset();
-  applyStyle();syncPreview();
+  buildStyleUI();applyStyle();syncPreview();
   if(typeof scheduleAutosave==='function')scheduleAutosave();
 }
 function randomiseStyle(){
   Object.keys(STYLE_FIELDS).forEach(k=>{
     const o=STYLE_FIELDS[k].opts; resumeStyle[k]=o[Math.floor(Math.random()*o.length)][0];
   });
-  resumeStyle.preset=matchPreset();applyStyle();syncPreview();
+  resumeStyle.preset=matchPreset();buildStyleUI();applyStyle();syncPreview();
   if(typeof scheduleAutosave==='function')scheduleAutosave();
   toast('Shuffled — '+(resumeStyle.preset==='custom'?'a one-off combination':STYLE_PRESETS[resumeStyle.preset].label));
 }
@@ -1453,9 +1489,17 @@ function styleFromDraft(d){
   const p=STYLE_PRESETS[legacy]?legacy:'classic';
   return Object.assign({preset:p},STYLE_PRESETS[p].s);
 }
+const RECOMMENDED_PRESETS=['classic','modern','minimal'];
+let _showAllPresets=false;
+function toggleAllPresets(){_showAllPresets=!_showAllPresets;buildStyleUI();}
 function buildStyleUI(){
   const g=$('presetGrid');
-  if(g)g.innerHTML=Object.keys(STYLE_PRESETS).map(id=>{
+  // if the active preset isn't one of the three recommended, force-expand so
+  // it's never hidden from the person currently using it
+  const forceAll=!RECOMMENDED_PRESETS.includes(resumeStyle.preset);
+  const showAll=_showAllPresets||forceAll;
+  const ids=showAll?Object.keys(STYLE_PRESETS):RECOMMENDED_PRESETS;
+  if(g)g.innerHTML=ids.map(id=>{
     const p=STYLE_PRESETS[id],s=p.s;
     const headBar=s.heading==='block'?'<i class="h" style="background:var(--resume-accent);height:4px;"></i>'
       :s.heading==='bar'?'<i class="h" style="background:var(--resume-accent)"></i>'
@@ -1466,6 +1510,9 @@ function buildStyleUI(){
       +nameBar+headBar+'<i></i><i></i><i style="width:70%"></i></div>'
       +'<div class="preset-name">'+p.label+'</div><div class="preset-desc">'+p.desc+'</div></div>';
   }).join('');
+  const btn=$('presetShowMoreBtn');
+  if(btn)btn.style.display=forceAll?'none':'';
+  if(btn)btn.textContent=showAll?'Show fewer':'Show all 6 templates';
   const k=$('knobGrid');
   if(k)k.innerHTML=Object.keys(STYLE_FIELDS).map(f=>{
     const F=STYLE_FIELDS[f];
@@ -1511,12 +1558,15 @@ function setMobView(v){
     document.body.classList.add('mob-preview');
     document.body.style.top='-'+_mobScrollY+'px';
     syncPreview();
+    document.addEventListener('keydown',_mobSheetEsc);
   }else{
     document.body.classList.remove('mob-preview');
     document.body.style.top='';
     window.scrollTo(0,_mobScrollY);
+    document.removeEventListener('keydown',_mobSheetEsc);
   }
 }
+function _mobSheetEsc(e){if(e.key==='Escape')setMobView('edit');}
 
 // ── Live preview ────────────────────────────────────────────
 function bHtml(raw){
@@ -1692,7 +1742,7 @@ function mkEntry(fields,cid,startOpen){
   const c=$(cid),idx=c.querySelectorAll('.entry').length+1;
   const d=document.createElement('div');
   d.className='entry';
-  d.innerHTML=`<div class="entry-head" onclick="toggleEntry(this)">
+  d.innerHTML=`<div class="entry-head" role="button" tabindex="0" aria-expanded="false" onclick="toggleEntry(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleEntry(this);}">
       <svg class="entry-caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5L8 6l-4 3.5"></path></svg>
       <div class="entry-title">Entry ${idx}</div>
       <span class="entry-warn" title="This entry has bullets that need work" hidden>!</span>
@@ -1703,14 +1753,18 @@ function mkEntry(fields,cid,startOpen){
   if(startOpen!==false)openEntry(d);
   syncPreview();
 }
+function syncEntryAria(entry){
+  const head=entry.querySelector('.entry-head');
+  if(head)head.setAttribute('aria-expanded',entry.classList.contains('open')?'true':'false');
+}
 function openEntry(entry){
   const cid=entry.parentElement&&entry.parentElement.id;
-  if(cid)$$('#'+cid+' .entry').forEach(x=>x.classList.toggle('open',x===entry));
-  else entry.classList.add('open');
+  if(cid)$$('#'+cid+' .entry').forEach(x=>{x.classList.toggle('open',x===entry);syncEntryAria(x);});
+  else{entry.classList.add('open');syncEntryAria(entry);}
 }
 function toggleEntry(head){
   const entry=head.closest('.entry');
-  if(entry.classList.contains('open'))entry.classList.remove('open');
+  if(entry.classList.contains('open')){entry.classList.remove('open');syncEntryAria(entry);}
   else openEntry(entry);
 }
 function rmEntry(btn,cid){btn.closest('.entry').remove();syncPreview();}
@@ -1995,7 +2049,7 @@ function renderAIResults(result,jdText){
     const lab=i>=0?LABS[i]:(a.section==='jd_match'?'JD Match':(a.section||'Improvement'));
     return`<div class="action-item"><div class="action-num">${idx+1}</div><div class="action-text"><strong>${esc(lab)}</strong><span>${esc(a.advice||'')}</span></div></div>`;
   }).join(''):'<div class="action-item"><div class="action-num">✓</div><div class="action-text"><strong>Your resume is in strong shape!</strong><span>Review section feedback above for final polish.</span></div></div>';
-  const r=$('scoreResults');r.style.display='block';
+  const r=$('scoreResults');r.style.display='block';const ex=$('scoreExample');if(ex)ex.style.display='none';
   setTimeout(()=>{if(r&&r.scrollIntoView)r.scrollIntoView({behavior:'smooth',block:'start'});},80);
 }
 
@@ -2096,7 +2150,7 @@ function runHeuristicScore(text,jdText){
     <div class="action-item"><div class="action-num">${idx+1}</div><div class="action-text"><strong>${x.lab}</strong><span>${actText(x)}</span></div></div>`).join('')
     ||'<div class="action-item"><div class="action-num">✓</div><div class="action-text"><strong>Your resume is in strong shape!</strong><span>Review section feedback above for final polish.</span></div></div>';
   // Show results
-  const r=$('scoreResults');r.style.display='block';
+  const r=$('scoreResults');r.style.display='block';const ex=$('scoreExample');if(ex)ex.style.display='none';
   setTimeout(()=>{if(r&&r.scrollIntoView)r.scrollIntoView({behavior:'smooth',block:'start'});},80);
 }
 
@@ -2147,7 +2201,7 @@ function restoreEntries(cid,addFn,arr){
     ENTRY_FIELDS[cid].forEach(c=>{const el=e.querySelector('.'+c);if(el)el.value=o[c]||'';});
   });
   // a restored draft opens collapsed — nothing is mid-edit
-  $$('#'+cid+' .entry').forEach(e=>e.classList.remove('open'));
+  $$('#'+cid+' .entry').forEach(e=>{e.classList.remove('open');syncEntryAria(e);});
 }
 function collectDraft(){
   return{
